@@ -1,2 +1,16 @@
 /figs/*.pdf
 /plots/*.pdf
+*.aux
+*.auxlock
+*.log
+*.synctex.gz
+*.dpth
+*.md5
+*.bbl
+*.blg
+*.lof
+*.lot
+*.out
+*.toc
+/main.pdf
+*.dep
