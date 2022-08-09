@@ -1,0 +1,340 @@
+% !TeX spellcheck = es_ES
+
+
+
+%__________________________ CAPÍTULO
+\chapter{Ejemplos de benchmark utilizados}
+\label{ch:ejemplos}
+
+\commentFG{Además de presentar los ejemplos, en algún momento (no sé si aquí o más adelante) hay que describir también qué maniobras se van a emplear con cada uno de ellos, tanto para ajustar los controladores como para verificar su funcionamiento. }
+
+En esta sección se presentan los dos ejemplos de benchmark que van a ser usados para evaluar y validar los métodos de corrección de la co-simulación.
+
+%__________________________ SECCIÓN
+\section{Oscilador lineal}
+\label{sec:oscilador}
+
+El primer ejemplo de benchmark es un oscilador lineal de dos grados de libertad, como se muestra en la Figura~\ref{fig:OsciladorLinealMono}, un sistema ampliamente utilizado en la literatura de co-simulación \cite{Gonzalez2011,Schweizer2015,Gomes2018,Gonzalez2019}.
+
+\begin{figure}[ht!]\centering
+	\includegraphics[]{./figs/benchmarks-figure0.pdf}
+	\caption{Oscilador lineal de dos grados de libertad.}
+	\label{fig:OsciladorLinealMono}
+\end{figure}
+
+El oscilador lineal de dos grados de libertad es un sistema mecánico compuesto por dos masas ($\mass_1$ y $\mass_2$) conectadas entre sí y al suelo mediante amortiguadores ($\damping_1$, $\damping_2$ y $\damping_c$ ) y resortes ($\stiffness_1$, $\stiffness_2$ y $\stiffness_c$) con coeficientes constantes.
+
+Los desplazamientos iniciales del sistema se establecieron en $\displacement_1(0) = \displacement_2(0) = 0\unit{m}$ siendo las fuerzas del resorte cero en esta configuración.
+Las velocidades iniciales del sistema son $\velocity_1(0) = 100\unit{m/s}$ y $\velocity_2(0) = -100\unit{m/s}$, un conjunto de valores previamente utilizados en la literatura, por ejemplo, \cite{Schweizer2014,Schweizer2015a,Gonzalez2019} debido a la disponibilidad de una solución analítica para su movimiento.
+Se definieron varios casos de simulación, resumidos en Tabla~\ref{tab:DLOpp}, para verificar el comportamiento del sistema para diferentes conjuntos de parámetros físicos.
+
+\begin{table}[ht]
+	\caption{Combinaciones de parámetros usados en el oscilador lineal.}
+	\begin{center}
+		\label{tab:DLOpp}
+		{ \footnotesize{
+				\renewcommand{\arraystretch}{1.25}
+				\begin{tabular}{lcccccccc}
+					\hline
+					& $\mass_1$ 	& $\mass_2$ 	&$\stiffness_1$ & $\stiffness_c$  &$\stiffness_2$ &$\damping_1$ & $\damping_c$ &$\damping_2$ \\
+					Caso	& [kg]		& [kg]	& [N/m] & [N/m] & [N/m] & [Ns/m] & [Ns/m] & [Ns/m]  \\
+					\hline
+					1		& $1$ 		& $1$ 	& $10$ & $100$ & $1000$ & $0$ & $0$ & $0$ \\
+					2		& $1$ 		& $1$ 	& $10$ & $100$ & $1000$ & $0.1$ & $0.1$ & $0.1$ \\
+				\end{tabular}
+		}}
+	\end{center}
+\end{table}
+
+El estado $\state$ de este sistema contiene los desplazamientos con respecto a la configuración de equilibrio $\displacement$ y las velocidades $\velocity$ de ambas masas,
+
+\begin{equation}
+	\state = \sqbr{\matr{c}{\state_1 \\ \state_2}} =  \sqbr{\hvect{cccc}{\displacement_1 & \velocity_1 & \displacement_2 & \velocity_2}}\trans
+\end{equation}
+
+En ausencia de fuerzas aplicadas externamente, las ecuaciones dinámicas del oscilador lineal se pueden escribir como
+%
+\begin{align}
+    \mass_1 \acceleration_1 + (\damping_1 + \damping_c) \velocity_1 - \damping_c \velocity_2 + (\stiffness_1 + \stiffness_c) \displacement_1 - \stiffness_c \displacement_2 &= 0\\
+    \mass_2 \acceleration_2 + (\damping_2 + \damping_c) \velocity_2 - \damping_c \velocity_1 + (\stiffness_2 + \stiffness_c) \displacement_2 - \stiffness_c \displacement_1 &= 0
+\end{align}
+
+Este sistema de ecuaciones diferenciales se puede reorganizar en forma matricial como
+%
+\begin{equation}
+	\dot{\state} = \matLO \state
+	\label{eq:LOana}
+\end{equation}
+
+donde $\matLO$ es una matriz cuadrada definida como
+%
+\begin{equation}
+	\matLO = \sqbr{\matr{cccc}{0& 1& 0& 0\\
+						-\frac{\stiffness_1 + \stiffness_c}{\mass_1}& -\frac{\damping_1 + \damping_c}{\mass_1}& \frac{\stiffness_c}{\mass_1}& \frac{\damping_c}{\mass_1}\\
+						 0& 0& 0& 1\\
+					 	\frac{\stiffness_c}{\mass_2}& \frac{\damping_c}{\mass_2}& -\frac{\stiffness_2 + \stiffness_c}{\mass_2}& -\frac{\damping_2 + \damping_c}{\mass_2}}}
+\end{equation}
+
+Si los coeficientes en las ecuaciones dinámicas son constantes, la solución de la Ecuación~\eqref{eq:LOana} es
+%
+\begin{equation}
+	\state (\ctime) = \state_0 e ^{\matLO (\ctime - \ctime_0)}
+\end{equation}
+
+donde $\ctime_0$ es eñ instante inicial y $\state_0$ el estado inicial.
+
+La figura~\ref{fig:OsciladorLinealCosim} muestra el oscilador lineal dividido en dos subsistemas en una configuración de co-simulación fuerza-desplazamiento.
+El subsistema $\mathcal{M}_1$ incluye el sistema de acoplamiento resorte-amortiguador y devuelve la fuerza $\force$ que ejerce sobre el segundo subsistema, $\mathcal{M}_2$.
+Esto, a su vez, se encarga de la integración del movimiento de $\mass_2$ y devuelve su desplazamiento $\displacement_2$ y velocidad $\velocity_2$, indicados aquí como la matriz $\state_2$.
+Solo el subsistema $\mathcal{M}_1$ está sujeto a direct feedthrough ($\feedthrough_{\mathcal{M}_1} \neq \zero$), y requiere conocer sus entradas para evaluar sus salidas en cualquier momento.
+En este esquema, las entradas $\inputs$ y las salidas $\outputs$ para cada subsistema están dadas por
+%
+\begin{align}
+	\inputs_{\mathcal{M}_1} 
+	&= \sqbr{\matr{c}{\state_2\extr}} = \sqbr{\matr{cc}{ \displacement_2\extr & \velocity_2\extr }}\trans 
+	&\quad\quad 
+	&\inputs_{\mathcal{M}_2} = \sqbr{\matr{c}{ \force\extr }} = \sqbr{\matr{c}{ \forceMod\extr }}
+	\notag\\
+	\outputs_{\mathcal{M}_1} 
+	&= \sqbr{\matr{c}{ \force }} = \sqbr{\matr{c}{ \forceMod }} 
+	&\quad\quad 
+	&\outputs_{\mathcal{M}_2} = \sqbr{\matr{c}{\state_2}} = \sqbr{\matr{cc}{ \displacement_2 & \velocity_2 }}\trans
+\end{align}
+%
+donde el superíndice $()\extr$ señala que la entrada de un subsistema puede no ser necesariamente igual a la salida del otro, porque el manager de co-simulación puede realizar modificaciones en sus valores, por ejemplo, una extrapolación.
+
+
+\begin{figure}[ht!]\centering
+	\includegraphics[]{./figs/benchmarks-figure1.pdf}
+	\caption{Oscilador lineal de dos grados de libertad siguiendo un esquema fuerza-desplazamiento.}
+	\label{fig:OsciladorLinealCosim}
+\end{figure}
+
+En este esquema de acoplamiento, la dinámica del subsistema $\mathcal{M}_1$ se puede expresar como
+%
+\begin{equation}
+    \mass_1 \acceleration_1 + (\damping_1 + \damping_c) \velocity_1 -  \damping_c \velocity_2\extr + (\stiffness_1 + \stiffness_c) \displacement_1 - \stiffness_c \displacement_2\extr = 0
+\end{equation}
+
+donde la fuerza de acoplamiento $\forceMod$ se evalúa en el subsistema $\mathcal{M}_1$ como
+%
+\begin{equation}
+	\forceMod = \damping_c (\velocity_1 - \velocity_2\extr) + \stiffness_c (\displacement_1 - \displacement_2\extr)
+\end{equation}
+
+La dinámica del subsistema $\mathcal{M}_2$, a su vez, se puede escribir como
+%
+\begin{equation}
+    \mass_2 \acceleration_2 + \damping_2 \velocity_2 + \stiffness_2 \displacement_2 = \forceMod\extr
+\end{equation}
+
+Como ya ha sido mencionado, en principio, $\forceMod \neq \forceMod\extr$, $\displacement_2 \neq \displacement_2\extr$ y $\velocity_2 \neq \velocity_2\extr$, debido a la extrapolación de las entradas o algún otro tipo de procesamiento que pueda ser realizado por el manager de co-simulación.
+
+%__________________________ SECCIÓN
+\section{Oscilador no lineal}
+\label{sec:osciladorNL}
+
+El segundo ejemplo de referencia es otra variación del oscilador lineal descrito en la Sección~\ref{sec:oscilador}, en el que los tres resortes y amortiguadores se pueden reemplazar por modelos no lineales, transformándolo así en un oscilador no lineal.
+Las fuerzas no lineales consideradas en este ejemplo incluyen
+%
+\begin{itemize}
+	\item \emph{Fuerzas de resorte no lineales} que siguen una función raíz cuadrada para el alargamiento del resorte de la forma
+	%
+	\begin{equation}
+		\forceMod = - \stiffness \; {\mathrm{sgn}}(\displacement) \; \sqrt{\abs{\displacement}} 
+		\label{eq:resorteNL}
+	\end{equation}
+	%
+	donde ${\mathrm{sgn}}()$ es la función signo, $\displacement$ es el alargamiento del resorte, y $\stiffness$ es el coeficiente linear de rigidez.
+	\\
+	\item \emph{Fuerzas de amortiguamiento no lineales} que siguen una función cuadrática de la velocidad de elongación del amortiguador $\velocity$ como
+	%
+	\begin{equation}
+		\forceMod = - \damping \; {\mathrm{sgn}}(\velocity) \; \abs{\velocity}^2
+		\label{eq:amortiguadorNL}
+	\end{equation}
+	% 
+	donde $\damping$ es el coeficiente de amortiguamiento lineal.
+\end{itemize}
+%
+Este oscilador no lineal se probó en dos escenarios diferentes.
+El primer caso considera que todas las fuerzas de resorte son no lineales como se describe en Eq.~\eqref{eq:resorteNL} y que el amortiguamiento no está presente.
+El segundo caso usa el amortiguamiento no lineal de Eq.~\eqref{eq:amortiguadorNL} y fuerzas de resorte lineales.
+La Tabla~\ref{tab:DNLOpp} resume los parámetros utilizados en los dos escenarios propuestos para este ejemplo de benchmark.
+Los desplazamientos y las velocidades iniciales de las masas fueron los mismos que se utilizaron para el oscilador lineal: $\displacement_1(0) = \displacement_2(0) = 0\unit{m}$, $\velocity_1(0) = 100\unit{m/s} $ y $\velocity_2(0) = -100\unit{m/s}$.
+
+\begin{table}[ht]
+	\caption{Combinaciones de parámetros usados en el oscilador no lineal.}
+	\begin{center}
+		\label{tab:DNLOpp}
+		{ \footnotesize{
+				\renewcommand{\arraystretch}{1.25}
+				\begin{tabular}{lcccccccc}
+					\hline
+					& $\mass_1$ 	& $\mass_2$ 	&$\stiffness_1$ & $\stiffness_c$  &$\stiffness_2$ &$\damping_1$ & $\damping_c$ & $\damping_2$ \\
+					Caso	& [kg]	& [kg]	& [N/m] & [N/m] & [N/m] & [Ns/m] & [Ns/m] & [Ns/m] \\
+					\hline
+					1		& $1$ 		& $1$ 	& $10$ & $100$ & $1000$ & $0$ & $0$ & $0$ \\
+					2		& $1$ 		& $1$ 	& $10$ & $100$ & $1000$ & $0.001$ & $0.001$ & $0.001$ \\
+				\end{tabular}
+		}}
+	\end{center}
+\end{table}
+
+%__________________________ SECCIÓN
+\section{Grúa hidráulica}
+\label{sec:grua}
+
+El tercer ejemplo de benchmark es una grúa hidráulica que consiste en un sistema multifísico de dos grados de libertad compuesto por un brazo robótico de dos barras accionado con un cilindro hidráulico, como se muestra en la Figura~\ref{fig:GruaMono}.
+Un sistema similar se propuso inicialmente en \cite{Naya2011}, y luego se incluyeron versiones modificadas en \cite{Peiret2018} y \cite{Rahikainen2020}.
+El ejemplo aquí propuesto es el mismo usado en \cite{Peiret2018}, aunque se realiza una maniobra diferente en las pruebas numéricas.
+
+\begin{figure}[ht!]\centering
+	\includegraphics[]{./figs/benchmarks-figure2.pdf}
+	\caption{Grúa hidráulica de dos grados de libertad.}
+	\label{fig:GruaMono}
+\end{figure}
+
+Este ejemplo es un ensamblaje multifísico compuesto por dos partes: un sistema multicuerpo plano y un circuito hidráulico.
+La parte mecánica consta de dos barras rígidas, conectadas entre sí y al suelo por articulaciones giratorias, de longitudes $\length_1$ y $\length_2$, respectivamente.
+El eslabón 1 está fijado al suelo en el punto $\point{A}$ y tiene una masa $\mass_1$ distribuida uniformemente, mientras que el eslabón 2 no tiene masa.
+Dos masas puntuales adicionales $\mass_2$ y $\mass_3$ están ubicadas en $\point{Q}$ y $\point{P}$, respectivamente.
+
+El sistema se acciona con un pistón hidráulico, que se detalla en la Figura~\ref{fig:GruaMono}, y se mueve bajo los efectos de la gravedad ($g=9.81\unit{m/s^2}$) a lo largo del eje negativo $y$ .
+%
+\begin{equation}
+	\forceMod = \piston \plbr{\pressure_2 - \pressure_1} - \damping \cylvelocity
+	\label{eq:cylinderForce}
+\end{equation}
+%
+donde $\piston$ es la sección transversal del pistón, $\damping$ es el coeficiente de disipación del actuador y $\cyldisplacement$ es la longitud del actuador, que varía durante el movimiento.
+
+La dinámica del sistema hidráulico se puede describir con el siguiente sistema de ecuaciones diferenciales
+%
+\begin{align}
+	\label{eq:hydODE1}
+	\dot{\pressure}_1 
+	&=
+	\dfrac{\bulkMod_1}{\piston \length_4}
+	\sqbr{\piston \cylvelocity 
+		+ \inputValve \discharge \sqrt{\dfrac{2 \plbr{\pressure_{\text{P}} - p_1}}{\density}}\delta_{\text{P1}} 
+		- \outputValve \discharge \sqrt{\dfrac{2 \plbr{\pressure_1 - \pressure_{\text{T}}}}{\density}}\delta_{\text{T1}}}
+	\\[2mm]
+	\dot{\pressure}_2 
+	&=
+	\dfrac{\bulkMod_2}{\piston \length_5}
+	\sqbr{- \piston \cylvelocity 
+		+ \outputValve \discharge \sqrt{\dfrac{2 \plbr{\pressure_{\text{P}} - \pressure_2}}{\density}}\delta_{\text{P2}} 
+		- \inputValve \discharge \sqrt{\dfrac{2 \plbr{\pressure_2 - \pressure_{\text{T}}}}{\density}}\delta_{\text{T2}}}
+	\label{eq:hydODE2}
+\end{align}
+
+\begin{figure}[ht!]\centering
+	\includegraphics[]{./figs/benchmarks-figure3.pdf}
+	\caption{Grúa hidráulica de dos grados de libertad siguiendo un esquema fuerza-desplazamiento.}
+	\label{fig:GruaCosim}
+\end{figure}
+%
+donde $\length_3$ es la longitud del cilindro, $\length_4$ y $\length_5$ son las longitudes de las cámaras a cada lado del pistón, $\inputValve$ y $\outputValve$ son las áreas de las válvulas que conectan el cilindro cámaras a la bomba y al tanque en el sistema hidráulico (no representado por simplicidad), $\density$ representa la densidad del fluido, y $\discharge$ representa el coeficiente de descarga de las válvulas.
+Las cantidades $\pressure_{\text{P}}$ y $\pressure_{\text{T}}$ son las presiones hidráulicas en la bomba y el tanque, respectivamente.
+Los coeficientes $\delta_{\text{P1}}$, $\delta_{\text{P2}}$, $\delta_{\text{T1}}$ y $\delta_{\text{T2}}$ son cero cuando la cantidad dentro de la raíz cuadrada que les precede es negativa, en caso contrario son iguales a uno.
+Los términos $\bulkMod_1$ y $\bulkMod_2$ representan el módulo de volumen en cada cámara del cilindro y se evalúan en función de la presión del fluido como
+%
+\begin{equation}
+	\bulkMod_i = \dfrac{1+\compressibilityA \pressure_i+\compressibilityB \pressure_i^2}{\compressibilityA+2\compressibilityB \pressure_i}\,, \quad i=1,2
+	\label{eq:bulkModulus}
+\end{equation}
+%
+donde $\compressibilityA$ y $\compressibilityB$ son constantes escalares que son propiedades de fluidos.
+Suponiendo que las cámaras de los dos cilindros tienen el mismo volumen al comienzo de la simulación, las longitudes de las cámaras $\length_4$ y $\length_5$ están dadas por
+%
+\begin{align}
+	\length_4 &= 0.5 l + \cyldisplacementIni - \cyldisplacement\\
+	\length_5 &= 0.5 l + \cyldisplacement - \cyldisplacementIni
+	\label{eq:chamberLengths}	
+\end{align}
+%
+donde $\cyldisplacementIni$ es la longitud inicial del actuador.
+Las áreas de las válvulas $\inputValve$ y $\outputValve$ se obtienen en función del desplazamiento controlado externamente $\spool$ de un carrete, que es una entrada del sistema
+%
+\begin{align}
+	\inputValve &= 5 \cdot 10^{-4} \spool\\
+	\outputValve &= 5 \cdot 10^{-4} \plbr{1-\spool}
+	\label{eq:ValveAreas}
+\end{align}
+%
+donde $\spool\in\sqbr{0,1}$.
+Se puede encontrar una descripción más detallada de los componentes del sistema hidráulico, así como la formulación utilizada para modelar su comportamiento en \cite{Peiret2018}.
+
+\begin{figure}[ht!]\centering
+	\includegraphics[]{./figs/benchmarks-figure4.pdf}
+	\caption{Representación del actuador hidráulico.}
+	\label{fig:GruaActuador}
+\end{figure}
+
+Los parámetros mecánicos utilizados para este ejemplo de benchmark se resumen en la Tabla~\ref{tab:HCpp}.
+\begin{table}[ht]
+\caption{Parámetros del sistema para la grúa hidráulica.}
+\begin{center}
+	\label{tab:HCpp}
+	{
+		\renewcommand{\arraystretch}{1.25}
+		\begin{tabular}{lc@{\qquad}r}
+			\hline
+			Longitud de la barra 1     	 				& $\length_1$          	& $1.0\unit{m}$  \\
+			Longitud de la barra 2 						& $\length_2$          	& $0.5\unit{m}$  \\
+			Longitud del cilindro                    		& $\length_3$           & $0.442\unit{m}$\\
+			Masa de la barra 1                          & $\mass_1$             & $200\unit{kg}$ \\
+			Masa en el punto $\point{Q}$               & $\mass_2$          	& $250\unit{kg}$ \\
+			Masa en el punto $\point{P}$               & $\mass_3$          	& $100\unit{kg}$ \\
+			Coordenadas del punto fijo $\point{B}$  & $\plbr{x_{\point{B}},y_{\point{B}}}$  & $\plbr{\sqrt{3}/2, 0}\unit{m}$ \\
+			Coeficiente de fricción    				& $\damping$           	& $10^5\unit{Ns/m}$ \\
+			Área del pistón                        		& $a_p$      			& $65 \cdot 10^{-4}\unit{m^2}$       \\
+			Coeficiente de compresibilidad				& $\compressibilityA$	& $6.53\cdot10^{-10}\unit{Pa}$ \\
+			Coeficiente de compresibilidad				& $\compressibilityB$	& $-1.19\cdot10^{-18}$ \\
+			Coeficiente de descarga					& $\discharge$			&		$0.67$	\\
+			Densidad del fluido							& $\density$			&		$850\unit{kgm^{-3}}$	\\
+			Presión hidráulica en la bomba 			& $\pressure_{\text{P}}$ & $7.6\unit{MPa}$\\
+			Presión hdráulica en el depósito 			& $\pressure_{\text{T}}$ & $100\unit{kPa}$\\
+			\hline
+		\end{tabular}
+	}
+\end{center}
+\end{table}
+
+En el instante $\ctime = 0$, los ángulos iniciales de las barras 1 y 2 son $\angles_1(0) = {\pi}/{6}\unit{rad}$ y $\angles_2(0) = {3\pi}/{2}\unit{rad}$.
+El sistema se encuentra inicialmente en un estado de equilibrio estático.
+La fuerza ejercida por el actuador durante la maniobra en estudio es regulada por la válvula controlada, donde el desplazamiento del carrete $\spool$ sigue una ley sinusoidal con amplitud variable $\amplitude$ y frecuencia constante $\angular = 2\unit{rad/s}$,
+
+%
+\begin{equation}
+	\spool = \spool_0 \plbr{1 - \amplitude \sin\plbr{2\pi\angular \ctime}} , \quad
+	{\textrm donde}\,
+	\amplitude = \lcubr{\matr{lcl}{
+			0.1\ctime \,, &\quad & 0\unit{s} \leq \ctime < 1\unit{s}	
+			\\	
+			0.1 \,, &\quad & 1\unit{s} \leq \ctime < 8\unit{s}	
+			\\
+			0.1 \plbr{9-\ctime} \,, &\quad & 8\unit{s} \leq \ctime < 9\unit{s}	
+			\\
+			0 \,, &\quad & \ctime \geq 9\unit{s}	
+	}}
+	\label{eq:timeHistoryValveSinusoidal}
+\end{equation}
+%
+El desplazamiento del carrete puede variar entre una válvula completamente cerrada ($\spool = 0$) y una válvula completamente abierta ($\spool = 1$).
+Inicialmente, el desplazamiento del carrete se fijó en $\spool_0 \approx 0.45435$, que corresponde al equilibrio estático del sistema.
+
+
+Las diferentes escalas de tiempo requeridas para una solución precisa de la dinámica multicuerpo e hidráulica hacen conveniente el uso de esquemas multi-rate para la co-simulación de este sistema.
+El tamaño del paso de integración requerido para el subsistema mecánico es del orden de $\microstep_{\mathcal{M}} = 1\unit{ms}$, mientras que el hidráulico normalmente requiere pasos de alrededor de $\microstep_{\mathcal{H} } = 100\unit{\mu s}$.
+La disposición del acoplamiento fuerza-desplazamiento de los subsistemas mecánico ($\mathcal{M}$) e hidráulico ($\mathcal{H}$) se muestra en la Figura~\ref{fig:OsciladorLinealCosim}.
+El subsistema $\mathcal{M}$ integra la dinámica del sistema multicuerpo usando como entrada la fuerza $\force$ ejercida por el pistón y devuelve como salida $\state_\mathcal{M}$ el desplazamiento $\cyldisplacement$ y la tasa $\cylvelocity $ del cilindro.
+El subsistema hidráulico $\mathcal{H}$, a su vez, integra su dinámica para obtener las presiones en el cilindro y evalúa la fuerza hidráulica usando la Ecuación~\eqref{eq:cylinderForce}.
+En esta configuración, el subsistema hidráulico $\mathcal{H}$ cuenta con direct feedthrough.
+Por lo tanto, las variables de acoplamiento para este caso serían
+%
+\begin{align}
+	\inputs_\mathcal{H} &= \sqbr{\matr{c}{\state_\mathcal{M}\extr}} = \sqbr{\matr{cc}{ \cyldisplacement\extr & \cylvelocity\extr}}\trans &\quad\quad &\inputs_\mathcal{M} = \sqbr{\matr{c}{ \force\extr }} = \sqbr{\matr{c}{ \forceMod\extr }}\notag\\
+	\outputs_\mathcal{H} &= \sqbr{\matr{c}{ \force }} = \sqbr{\matr{c}{ \forceMod }}&\quad\quad &\outputs_\mathcal{M} = \sqbr{\matr{c}{\state_\mathcal{M}}} = \sqbr{\matr{cc}{ \cyldisplacement & \cylvelocity }}\trans
+\end{align}

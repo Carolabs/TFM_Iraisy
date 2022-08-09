@@ -1,0 +1,113 @@
+% !TeX spellcheck = es_ES
+
+
+
+%__________________________ CAPÍTULO
+\chapter{Definición del problema}
+\label{ch:definicion}
+
+
+\commentFG{Antes de meterse a describir los esquemas y los flujos de potencia en co-simulación, me parece necesario tener muy claro cuál es el problema que realmente estamos tratando de resolver.}
+
+\commentFG{¿Tienes claro cuál es el origen del exceso de energía (o de que el flujo total de potencia no sea cero?) en co-sim explícita. Creo que sería bueno empezar por aquí.}
+
+\commentFG{No sé si nos interesa meternos en el caso multirate. Me parece que con conseguir que funcione el caso single-rate tenemos más que suficiente.}
+
+Dado un sistema a simular, el uso de solver monolítico para la integración de su dinámica produce unos errores de integración dependientes del tipo de integrador usado. Durante esta integración numérica, se producen flujos de potencia entre los distintos componentes que conforman el sistema como se ilustra en la Figura~\ref{fig:mono}.
+
+\begin{figure}[ht!]\centering
+	\includegraphics[]{./figs/schemes-figure0.pdf}
+	\caption{Flujos de potencia entre componentes usando un solver monolítico.}
+	\label{fig:mono}
+\end{figure}
+
+En este caso, si se desprecian los errores del integrador se puede aplicar la ley de conservación de la energía de tal modo que $\power_{Co1} + \power_{Co2} + \power_{Co3} = 0$
+
+\begin{figure}[ht!]\centering
+	\includegraphics[]{./figs/schemes-figure2.pdf}
+	\caption{Flujos de potencia entre subsistemas en un entorno de co-simulación.}
+	\label{fig:cosim}
+\end{figure}
+
+
+En este segundo caso, despreciando los errores del integrador, por lo general no se conserva la energía en el sistema $\power_{SS1} + \power_{SS2} + \power_{SS3} \neq 0$, sino que la interfaz de co-simulación introduce un error en la potencia intercambiada en la interfaz que se puede cuantificar como $\delta \power$ y que es la responsable del deterioro de las soluciones en muchas configuraciones de los entornos de co-simulación.
+
+Este trabajo se va a centrar en los esquemas de co-simulación Jacobi explícitos, es decir, una esquema de acoplamiento donde los subsistemas se integran en paralelo y no se permite la repetición de los pasos de integración para asegurar la convergencia. 
+
+%__________________________ SECCIÓN
+\section{Esquema de acoplamiento Jacobi}
+\label{sec:Jacobi}
+
+Los esquemas de tipo Jacobi se usan comúnmente en co-simulación explícita.
+Este enfoque permite la integración simultánea de los subsistemas, una característica muy conveniente si se busca la paralelización de la ejecución del código, que se volvería más complicada si se adoptan esquemas secuenciales de Gauss-Seidel.
+
+La Figura~\ref{fig:jacobi} ilustra la forma en que procede la integración numérica entre dos puntos de comunicación según este esquema, para una co-simulación de tan solo dos subsistemas.
+En el momento $t=\ctime^{\step}$, los subsistemas envían sus outputs $\outputs_1^{\step}$ y $\outputs_2^{\step}$ al manager de co-simulación (paso 1), que a su vez, los evalúa y les devuelve los inputs $\inputs_1^{\step}$ y $\inputs_2^{\step}$ (paso 2).
+En este punto, ambos subsistemas pueden realizar su integración numérica de manera independiente desde el tiempo $\ctime^{\step}$ hasta el $\ctime^{\step +1}$ (paso 3).
+El proceso se reinicia en el instante $\ctime^{\step + 1}$ cuando los nuevos outputs $\outputs_1^{\step + 1}$ y $\outputs_2^{\step + 1}$ se envían al manager (paso 4).
+\begin{figure}[ht!]\centering
+	\includegraphics[]{./figs/schemes-figure3.pdf}
+	\caption{Diagrama de un esquema Jacobi explícito, single-rate con dos subsistemas.}
+	\label{fig:jacobi}
+\end{figure}
+
+Los esquemas de tipo Jacobi pueden ser single-rate, si el paso de comunicación es el mismo para todos los subsistemas, o multi-rate si en cambio se utilizan diferentes pasos de tiempo.
+El impacto del direct feedthrough es otro factor que también debe tenerse en cuenta en los esquemas de co-simulación.
+Este concepto denota la dependencia explícita de los outputs del subsistema de sus inputs.
+Su presencia en un esquema de co-simulación puede llevar a la existencia de bucles algebraicos, lo que muchas veces motiva la necesidad de realizar la etapa de inicialización de forma iterativa \cite{Andersson2016}.
+Además, durante el tiempo de ejecución, la presencia de direct feedthrough se asocia con un deterioro de las propiedades de convergencia y estabilidad de la integración numérica \cite{Arnold2013}.
+Esto motiva la necesidad de extrapolar las entradas del subsistema en esquemas Jacobi single-rate explícitos, incluso cuando se usan fórmulas integradoras de un solo paso dentro de los subsistemas.
+Esta extrapolación a menudo se convierte en una fuente de errores de acoplamiento entre los subsistemas.
+El problema se puede ilustrar asumiendo que la dinámica de un subsistema dado se puede expresar usando notación de espacio de estados en forma discreta de la siguiente manera
+%
+\begin{equation}
+	\sqbr{\matr{c}{\state \\ \outputs}} = \sqbr{\matr{cc}{\stateMatrix & \inputMatrix \\ \outputMatrix & \feedthrough}} \sqbr{\matr{c}{\state \\ \inputs}}
+	\label{eq:statespace}
+\end{equation}
+%
+donde $\state$ es el vector de estados del subsistema, y $\stateMatrix$, $\inputMatrix$, $\outputMatrix$ y $\feedthrough$ son las matrices de estado, inputs, outputs y feedthrough, respectivamente.
+En un esquema de tipo Jacobi single-rate como el de la Figura~\ref{fig:jacobi}, si se utilizan fórmulas de integración explícitas en los subsistemas, la evaluación de las derivadas de los estados $\derivative$ en el macrostep $[\ ctime^{\step}, \ctime^{\step + 1}]$ solo necesita ejecutarse en el instante $\ctime^{\step}$ para evaluar $\state^{\step + 1}$.
+En este momento, se conocen tanto el estado $\state^{\step}$ como la entrada $\inputs^{\step}$, por lo que la interfaz de co-simulación de tiempo discreto no introduce ningún error en el cálculo de las derivadas del sistema.
+
+La salida del subsistema $\outputs$, por otro lado, debe evaluarse y devolverse en el tiempo $\ctime^{\step + 1}$ como
+%
+\begin{equation}
+	\outputs^{\step + 1} = \outputMatrix \state^{\step + 1} + \feedthrough \inputs^{\step + 1}
+	\label{eq:statespaceOutput}
+\end{equation}
+%
+así que en principio, requiere conocer los inputs $\inputs{\step + 1}$, que aún no están disponibles.
+Si el subsistema no tiene direct feedthrough, es decir, $\feedthrough = \zero$, la salida $\outputs^{\step + 1}$ se pueden evaluar directamente como
+%
+\begin{equation}
+	\outputs^{\step + 1} = \outputMatrix \state^{\step + 1}
+	\label{eq:statespaceOutputNoDF}
+\end{equation}
+%
+Los resultados obtenidos por la Ecuación~\eqref{eq:statespaceOutputNoDF} solo incluyen el error numérico causado por la fórmula de integración utilizada para actualizar el estado entre $\ctime^{\step}$ y $\ctime^{\step + 1}$.
+Por el contrario, un subsistema con direct feedthrough contará con $\feedthrough \neq \zero$ y necesitará una aproximación $\nextApproxInput$ de las entradas en $\ctime^{\step + 1}$ para la evaluación de la salida,
+%
+\begin{equation}
+	\outputs^{\step + 1} = \outputMatrix \state^{\step + 1} + \feedthrough \nextApproxInput
+	\label{eq:statespaceOutputApprox}
+\end{equation}
+%
+La entrada aproximada $\nextApproxInput$ se puede obtener de diferentes maneras, por ejemplo, mediante extrapolación polinomial, pero en general, no será igual a $\inputs^{\step + 1}$.
+Esta aproximación introducirá un error adicional en la evaluación de la dinámica del sistema, lo que deteriorará la precisión de los resultados de la co-simulación.
+Sin embargo, existen varios escenarios en los que la extrapolación de las entradas introduce fuentes adicionales de error en el proceso de co-simulación, incluso si los subsistemas no están sujetos a direct feedthrough:
+\begin{itemize}
+	\item{
+		Las fórmulas de integración implícitas requieren la derivada $\derivative^{\step + 1}$ en la evaluación de $\state ^{\step + 1}$.
+        La aproximación de entrada es necesaria como lo demuestra la Ecuación~\eqref{eq:statespace}.
+	} 
+	\item{
+	    Los esquemas de co-simulación multi-rate hacen necesario evaluar las derivadas del estado del subsistema en puntos intermedios entre los puntos de comunicación $\ctime^{\step}$ y $\ctime^{\step + 1}$, dando lugar a la necesidad de extrapolación de los inputs, excepto en el caso en el que $\inputMatrix = \zero$.
+	}
+	\item{
+	    En el caso de sistemas no lineales, las matrices $\stateMatrix$, $\inputMatrix$, $\outputMatrix$ y $\feedthrough$ pueden ser funciones del estado $\state$ y la entrada $\inputs$.
+	}
+\end{itemize}
+Las circunstancias previamente mencionadas deben tenerse en cuenta para una la evaluación de la violación de la conservación de la energía que existe en la interfaz de acoplamiento, además de otros errores, por ejemplo, los que se derivan del proceso de integración, que también introducen imprecisiones en los resultados, aunque su impacto es frecuentemente menos crítico que el de la extrapolación de entrada \cite{Chen2021}.
+
+Diferentes enfoques se han propuesto en la literatura, siendo los basados en la potencia intercambiada en la interfaz de co-simulación los más comunes. Estos enfoques tratan de modificar los outputs del subsistema con direct feedthrough para que disipen el exceso de energía introducida por la interfaz. 
+En este trabajo se propondrá otro enfoque basado en diferentes técnicas matemáticas para corregir estos outputs y de esta manera, no modificar de forma artificial la energía del sistema.

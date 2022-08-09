@@ -1,0 +1,64 @@
+% !TeX spellcheck = es_ES
+
+%__________________________ CAPÍTULO
+\chapter{Introducción}
+\label{ch:intro}
+
+\commentFG{Esto parece una reutilización del texto de la tesis de Borja (sección 5.1). Está bien referirse a documentos ya publicados pero entonces 1) hay que citar la fuente, 2) hay que adaptar el texto para que haga referencia al objetivo de la publicación actual y 3) en general, no está bien visto emplear trozos grandes de texto de forma textual. Creo que será interesante revisar esta sección para que se refiera de manera directa a tu TFM, y no sea simplemente la adptación de otro trabajo.}
+
+\commentFG{Yo en esta parte pondría: 1) Una presentación breve de qué es la co-simulación y por qué es interesante/necesaria usarla en aplicaciones industriales. Probablemente esto se pueda conseguir a partir de los párrafos que hay debajo. 2) Una mención de los problemas a los que se enfrenta la co-simulación en la práctica: se introducen errores numéricos en la interfaz de tiempo discreto, que estropean el balance de energía del sistema completo. En casos extremos, la simulación se vuelve inestable. 3) Yo no incluiría aquí la mayor parte de la sección 2.1. Se trata de explicaciones específicas de cosim que probablemente son demasiado detalladas. Seguramente tendrá más sentido ponerlas más adelante. 4) Hay que manifestar aquí la intención de usar IA para resolver el problema que has mencionado. Aquí vendría bien una explicación (también breve) sobre qué es IA y cómo pensamos aplicarla a la resolución de los inconvenientes que presenta la co-simulación.}
+
+Desde su introducción en entornos industriales en la década de 1960, la simulación por ordenador de sistemas ha demostrado ser una herramienta valiosa para reducir los tiempos de diseño y ahorro de costes.
+
+
+Hoy en día, la mayoría de los sistemas para aplicaciones industriales suelen describirse mediante ecuaciones dinámicas complejas, en las que los componentes involucrados tienen naturalezas y escalas de tiempo dispares.
+Con el fin de construir modelos adecuados a estas aplicaciones, es
+es necesario generar descripciones realistas de los componentes y de las interacciones entre ellos. 
+Sistemas complejos como vehículos pueden ser ejemplos representativos, en los cuales los efectos mecánicos, eléctricos, electrónicos e incluso térmicos están relacionados y se influyen entre sí. 
+La selección de los algoritmos para resolver la dinámica de cada problema y obtener sus salidas es una tarea crítica que influye en el rendimiento y precisión de las simulaciones.
+Existen dos principales enfoques: monolítico o co-simulación.
+
+
+La simulación monolítica describe la respuesta de un sistema con un único conjunto de ecuaciones que son integradas en el tiempo con un único algoritmo (solver).
+Por lo general, este solver tiene acceso ilimitado a los detalles de cada componente del sistema, ya que estos detalles a menudo se requieren para ensamblar y resolver sus ecuaciones dinámicas \cite{Samin2007}. 
+La integración monolítica presenta dos grandes problemas. 
+Por un lado, se requiere un solver genérico para integrar el conjunto completo de ecuaciones independientemente de su naturaleza, lo que puede mermar el rendimiento general de la simulación, aunque las soluciones monolíticas tienden a ser robustas.
+Además, este solver debe ser adaptado al tamaño de paso que corresponde a la dinámica más rápida del sistema.
+Por otro lado, el solver necesita tener acceso completo a los detalles de implementación de cada
+componente en la mayoría de los casos. 
+En un número considerable de aplicaciones industriales, esto es no es posible, debido a los derechos de propiedad intelectual como en los casos donde se combinan componentes y modelos de diferentes proveedores. 
+
+La co-simulación, por el contrario, consiste en describir un determinado sistema como un conjunto de subsistemas en los que sus dinámicas se integran por separado e intercambian un reducido conjunto de variables entre ellos y coordinados por un manager de co-simulación. 
+Cada subsistema tiene su propio conjunto de variables, tamaño de paso de integración y solver, el cual se puede adaptar a las necesidades particulares del modelo.
+A diferencia de las simulaciones monolíticas, la co-simulación presenta dos ventajas importantes. 
+Por un lado, cada subsistema está integrado por un solver especializado para la dinámica del problema.
+Por otro lado, cada subsistema sólo expone al entorno de co-simulación un conjunto reducido de variables de acoplamiento, que evita la revelación de detalles confidenciales de implementación. 
+
+La co-simulación también presenta varios inconvenientes en la práctica. 
+Primero, la comunicación entre el manager de co-simulación y los subsistemas se llevan a cabo solo en puntos de tiempo discreto.
+Una vez que cada subsistema llega a un punto de comunicación, envía sus nuevas salidas al manager y este, a su vez, pasa las nuevas entradas a cada subsistema. 
+El intervalo de tiempo entre dos puntos de comunicación se denota comúnmente como macropaso de tiempo. 
+Entre dos puntos de comunicación consecutivos, cada solver se encarga de la integración de sus propios estados sin interactuar con su entorno, es decir, no hay nueva información disponible de los otros subsistemas hasta que se alcance el siguiente punto de comunicación. 
+Cuando un subsistema requiere la actualización de sus entradas entre dos puntos de comunicación el manager debe recurrir a diferentes técnicas para proveer de datos actualizados aproximados, como la extrapolación, para aproximar
+el valor real de la entrada en ese momento. 
+
+
+%__________________________ SECCIÓN
+\section{Presentación del problema}
+\label{sec:problema}
+
+El intercambio de información en tiempo discreto que se produce en el manager tiende a provocar discontinuidades en las entradas del subsistema, lo que deteriora la calidad de los resultados y puede introducir componentes dinámicos de alta frecuencia en la dinámica del sistema \cite{Benedikt2013}.
+En algunas aplicaciones donde se usa la co-simulación, alguno de los subsistemas pueden ser componentes reales los cuales introducen restricciones adicionales como pasos de integración constantes, o esquemas explícitos puesto que no se pueden repetir los pasos de integración debido a que los sistemas reales no pueden moverse hacia atrás en el tiempo.
+Esto impide el uso de esquemas de co-simulación implícitos en los que los pasos de integración pueden repetirse hasta asegurarse la convergencia y produciendo resultados más precisos que los esquemas explícitos.
+
+En general, se ha demostrado que los esquemas explícitos introducen errores numéricos en la integración de las dinámicas de los subsistemas, provocando una variación de la energía y deteriorando las soluciones obtenidas.
+Diferentes enfoques se han utilizado en la literatura para arreglar este fenómeno, como el cálculo de  la potencia transmitida a través de la interfaz y la modificación de las variables de acoplamiento para eliminar los errores de energía introducidos \cite{Sadjina2017, Rodriguez2022}.
+
+La configuración de los entornos de co-simulación pueden llegar a ser increíblemente compleja, pero en términos generales puede resumirse en:
+%
+\begin{itemize}
+    \item \textbf{Esquema de co-simulación:} los subsistemas pueden ser integrados usando esquemas paralelos como Jacobi, o secuenciales como Gauss-Seidel.  
+    \item \textbf{Selección de la malla de tiempos:} dependiendo de las dinámicas de cada subsistema, puede ser necesario ajustar el paso de tiempo para cada subsistema. Se clasifican en single-rate cuando todos los subsistemas tienen el mismo paso de tiempo, y multi-rate cuando existen diferentes pasos de tiempo.
+    \item \textbf{Selección de variables de acoplamiento:} son las variables que se intercambian entre los subsistemas y el manager de co-simulación. Este trabajo se centra en el acoplamiento fuerza-desplazamiento.
+    \item \textbf{Extrapolación:} si los subsistemas necesitan entradas actualizadas para proceder con la integración de su dinámica y el manager no puede proporcionar nuevos datos, se recuerrer a una extrapolación de las entradas que en general es de tipo polinómico, siendo la extrapolación de orden 0 y 1 las más comunes.
+\end{itemize}

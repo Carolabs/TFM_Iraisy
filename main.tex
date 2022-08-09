@@ -1,0 +1,121 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 				GENERAL
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[a4paper,11pt,oneside]{memoir}
+\setulmarginsandblock{2.5cm}{*}{*} % Márgenes superior e inferior
+\setlrmarginsandblock{2.5cm}{*}{*} % Márgenes laterales
+\checkandfixthelayout              % Imprescindible para que los \set*margins... funcionen
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 				FONTS AND UNITS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Definición de fuentes: Arial (helvética) como fuente por defecto.
+\usepackage[scaled]{helvet}
+\usepackage[helvet]{sfmath}
+\renewcommand\familydefault{\sfdefault} 
+\usepackage[T1]{fontenc}
+\usepackage{commath}
+\usepackage{booktabs}
+\usepackage{bm}
+\input{./macros/colours}
+\input{./macros/variables}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 				GRAPHICS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{graphicx}
+\usepackage{tikz}               % TikZ y pgfplots Para gráficas
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 				COLORS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{xcolor}
+\definecolor{udccolor}{HTML}{CE0070}
+
+\usepackage[spanish]{babel}
+\renewcommand{\spanishtablename}{Tabla}
+
+\makechapterstyle{EPSstyle}{
+  \renewcommand{\chapnamefont}{\color{udccolor}\normalfont\Large\scshape\bfseries}
+  \renewcommand{\chapnumfont}{\color{udccolor}\normalfont\Large\scshape\bfseries}
+  \renewcommand{\chaptitlefont}{\color{udccolor}\normalfont\Large\scshape\bfseries}
+  \renewcommand{\printchaptername}{}
+  \renewcommand{\chapternamenum}{}
+  \renewcommand{\printchapternum}{\chapnumfont \thechapter}
+  \renewcommand{\afterchapternum}{. }
+}
+\chapterstyle{EPSstyle}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 				BINDINGS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setcounter{tocdepth}{2} % profundidad de tabla de contenido (hasta subsection)
+\setcounter{secnumdepth}{2} % numeracion de esa profundidad
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 				OTHERS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{cite}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 				COMMENTS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Comments
+\newcommand{\commentFG}[1]{\textcolor[rgb]{0.8,0.0,0.0}{\textbf{FG: #1}}}
+\newcommand{\commentJB}[1]{\textcolor[rgb]{0.0,0.8,0.0}{\textbf{JB: #1}}}
+\newcommand{\commentIF}[1]{\textcolor[rgb]{0.0,0.0,0.8}{\textbf{IF: #1}}}
+
+
+\begin{document}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 				FIRST PAGE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\include{tex/portada}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 				MAIN
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tableofcontents*
+\clearpage
+\listoffigures
+\clearpage
+\renewcommand{\listtablename}{Índice de tablas}
+\listoftables
+\mainmatter
+
+%% En el documento, espaciado de 6pt entre párrafos
+\setlength{\parskip}{6pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 			 CONTENT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\include{tex/resumenES}
+\include{tex/resumenGL}
+\include{tex/resumenEN}
+\include{tex/introducion}
+\include{tex/estado}
+\include{tex/objeto}
+\include{tex/definicion}
+\include{tex/ejemplos}
+\include{tex/algoritmos}
+\include{tex/resultados}
+\include{tex/conclusiones}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 			 APPENDICES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+\include{tex/apendice}
+
+\bibliographystyle{ieeetr}  
+\bibliography{bib.bib}
+
+\end{document}

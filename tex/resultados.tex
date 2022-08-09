@@ -1,0 +1,188 @@
+% !TeX spellcheck = es_ES
+
+%__________________________ CAPÍTULO
+\chapter{Presentación de resultados}
+\label{ch:resultaods}
+
+\commentIF{Escribir una introducción aquí}
+
+\commentFG{Tienes que modificar las escalas y tipos de línea de las gráficas para que se puedan interpretar correctamente. Ahora mismo no es fácil ver nada en la figura 8.2: la escala vertical tendría que ser más amplia y, aún así, no se distingue el contenido. Es posible que te interese presentar sólo el último segundo de simulación, para que se aprecie la diferencia entre las tres curvas.}
+
+\commentFG{Hay un problema parecido en las 8.4 y 8.8, entiendo que hay dos curvas que se solapan pero no vemos cuáles. Y puede que las 8.5 y 8.6 queden más claras si muestras solo el final de la maniobra.}
+
+\commentFG{Más allá del estilo de las gráficas, hay una cosa que me preocupa: para hacer la corrección de cada maniobra en co-simulación, ¿necesitamos tener una referencia monolítica? Si la respuesta es sí, tenemos un problema. Si ya has sido capaz de llevar a cabo la maniobra con un monolítico, ¿qué interés tiene co-simular, que siempre es más complicado y menos fiable?}
+
+\commentFG{Llegados aquí tenemos dos opciones: 1. Buscar algoritmos de IA que no requieran una referencia monolítica. Esto es muy interesante, porque la referencia monolítica, en la mayoría de casos interesantes de co-simulación, no va a estar disponible. 2. Si no somos capaces de hacer lo del punto 1, por lo menos sería necesario ajustar el controlador con una maniobra (o serie de maniobras) y luego verificar que sigue siendo válido en otras maniobras distintas. Con esto, al menos, se justifica el interés de la investigación.}
+
+\commentFG{Si ajustamos para una maniobra y luego utilizamos el controlador para esa maniobra, entonces ¿para qué necesitamos el controlador?}
+
+%__________________________ SECCIÓN
+\section{Oscilador lineal}
+\label{sec:res_oscilador}
+
+El primer ejemplo estudiado será el oscilador lineal de dos grados de libertad que se ha descrito en la Sección~\ref{sec:oscilador}. 
+
+Los resultados presentados para este ejemplo fueron obtenidos con un entorno de co-simulación con esquema Jacobi single-rate, donde todos los pasos de integración fueron fijados a $1\unit{ms}$ y con acoplamiento fuerza-desplazamiento. 
+
+Debido a la existencia de una solución analítica, los resultados de la solución de referencia se han obtenido usando esta solución y que ya ha sido presentada en la misma Sección.
+
+%__________________________ SUBSECCIÓN
+\subsection{Oscilador lineal Caso 1: sin amortiguamiento}
+\label{subsec:res_oscilador1}
+
+El primer caso presenta una configuración  de parámetros sin disipación como describe la Tabla~\ref{tab:DLOpp}.
+Para realizar la corrección ha sido necesario limitar la diferencia entre la fuerza que sale del subsistema 2 y la fuerza calculada por el estimador en $18\unit{N}$ para evitar inestabilidades en la co-simulación.
+
+Se ha realizado un proceso iterativo lanzando el estimador 10 veces hasta alcanzar una convergencia.
+Tras este proceso iterativo se ha obtenido unos coeficientes del estimador iguales a $\coefficients = \sqbr{\matr{ccc}{-0.6418  & 2.4258 & -1.4454}}$.
+
+\begin{figure}[ht!]\centering
+	\includegraphics[]{./plots/lo-figure0.pdf}
+	\caption{Posición de la masa 2 del oscilador lineal para el Caso 1.}
+	\label{fig:OsciladorLinealPos1}
+\end{figure}
+
+En la Figura~\ref{fig:OsciladorLinealPos1} se muestra como el estimador lineal es capaz de corregir los valores de la posición de la masa 2 $\displacement_2$, eliminando el efecto de aumento de amplitud introducido por el esquema de co-simulación.
+
+
+\begin{figure}[ht!]\centering
+	\includegraphics[]{./plots/lo-figure1.pdf}
+	\caption{Velocidad de la masa 2 del oscilador lineal para el Caso 1.}
+	\label{fig:OsciladorLinealVel1}
+\end{figure}
+
+De la misma forma la Figura~\ref{fig:OsciladorLinealVel1} presenta la corrección de la variable velocidad de la masa 2 $\velocity_2$ al introducir el estimador ya mencionado.
+
+\begin{figure}[ht!]\centering
+	\includegraphics[]{./plots/lo-figure2.pdf}
+	\caption{Fuerza de acoplamiento del oscilador lineal para el Caso 1.}
+	\label{fig:OsciladorLinealFor1}
+\end{figure}
+
+La Figura~\ref{fig:OsciladorLinealFor1} pone el foco en el deterioro de la precisión de la fuerza de acoplamiento en un sistema co-simulado y sobre la que va a actuar el estimador manteniendo el error entre la calculada por co-simulación y la real lo más bajo posible.
+Este problema surge debido a que el subsistema 2 presenta direct feedthrough que es el causante de esta divergencia.
+El uso del estimador actúa sobre la fuerza original que devuelve el subsistema 2 y que recibe como input el subsistema 1, corrigiendo esta desviación y manteniendo los resultados muy cercanos a la solución analítica de referencia.
+
+\begin{figure}[ht!]\centering
+	\includegraphics[]{./plots/lo-figure3.pdf}
+	\caption{Energía del oscilador lineal para el Caso 1.}
+	\label{fig:OsciladorLinealEnergia1}
+\end{figure}
+
+Este error en la fuerza de acoplamiento es la causante de una deriva de energía haciendo que el sistema se vuelva inestable como ilustra la Figura~\ref{fig:OsciladorLinealEnergia1}.
+Este exceso de energía en el sistema se ve claramente reflejado en unas amplitudes crecientes en la posición y velocidad de la masa 2.
+
+
+%__________________________ SUBSECCIÓN
+\subsection{Oscilador lineal Caso 2: con amortiguamiento}
+\label{subsec:res_oscilador2}
+
+El segundo caso analizado corresponde con los parámetros con disipación descritos en la Tabla~\ref{tab:DLOpp}.
+Como en el caso anterior se ha realizado una estimación de la fuerza  que debe recibir como input el subsistema 1.
+Sin embargo, en este caso la disipación permite que el proceso sea más estable, pero esto no implica que los resultados obtenidos sean precisos.
+Los coeficientes del estimador obtenidos tras 10 iteraciones son:
+$\coefficients = \sqbr{\matr{ccc}{-0.3657 & 1.9095 & -0.9254}}$.
+
+\begin{figure}[ht!]\centering
+	\includegraphics[]{./plots/lo-figure4.pdf}
+	\caption{Posición de la masa 2 del oscilador lineal para el Caso 2.}
+	\label{fig:OsciladorLinealPos2}
+\end{figure}
+
+\begin{figure}[ht!]\centering
+	\includegraphics[]{./plots/lo-figure5.pdf}
+	\caption{Velocidad de la masa 2 del oscilador lineal para el Caso 2.}
+	\label{fig:OsciladorLinealVel2}
+\end{figure}
+
+\begin{figure}[ht!]\centering
+	\includegraphics[]{./plots/lo-figure6.pdf}
+	\caption{Fuerza de acoplamiento del oscilador lineal para el Caso 2.}
+	\label{fig:OsciladorLinealFor2}
+\end{figure}
+
+La Figura~\ref{fig:OsciladorLinealPos2} muestra como el uso del estimador mejora la precisión de los resultados obtenidos en la co-simulación original sin corrección.
+En este caso el resultado original presentaba amplitudes decrecientes debido a la disipación, pero que no coincidían con los valores reales.
+La corrección que introduce el estimador permite eliminar este exceso de amplitud.
+Lo mismo se puede observar en la Figura~\ref{fig:OsciladorLinealVel2} para la velocidad de la masa 2.
+
+En cuanto a la fuerza de acoplamiento, en la Figura~\ref{fig:OsciladorLinealFor2} se muestra como la corrección reduce los excesos de amplitud del sistema sin corregir, permitiendo resultados más precisos en sus valores.
+
+\begin{figure}[ht!]\centering
+	\includegraphics[]{./plots/lo-figure7.pdf}
+	\caption{Energía del oscilador lineal para el Caso 2.}
+	\label{fig:OsciladorLinealEnergia2}
+\end{figure}
+
+Por último, la Figura~\ref{fig:OsciladorLinealEnergia2} representa el exceso de energía del sistema original co-simulado y cómo el estimador es capaz de retirar ese exceso para mantener la dinámica próxima a la solución analítica.
+
+\commentIF{Es necesario arreglar los colores y tipos de líneas de las gráficas}
+
+\commentFG{sí}
+
+%__________________________ SECCIÓN
+\section{Oscilador no lineal}
+\label{sec:res_osciladorNL}
+
+%__________________________ SUBSECCIÓN
+\subsection{Oscilador no lineal Caso 1: resorte no lineal}
+\label{subsec:res_osciladorNL1}
+
+%__________________________ SUBSECCIÓN
+\subsection{Oscilador no lineal Caso 2: amortiguamiento cuadrático}
+\label{subsec:res_osciladorNL2}
+
+%__________________________ SECCIÓN
+\section{Grúa Hidráulica}
+\label{sec:res_grua}
+
+El segundo ejemplo estudiado será la grúa hidráulica de dos de libertad que se ha descrito en la Sección~\ref{sec:grua}. 
+
+Los resultados presentados para este ejemplo fueron obtenidos con un entorno de co-simulación con esquema Jacobi multi-rate, donde el paso de integración del subsistema mecánico está fijado en $10\unit{ms}$ y $100\unit{\mu s}$ para el subsistema hidráulico y con acoplamiento fuerza-desplazamiento.
+
+A diferencia del ejemplo anterior no existe una solución analítica que pueda ser usada para comparar los resultados.
+En este caso, se ha optado por usar como solución de referencia la solución monolítica del sistema con el mismo paso de tiempo que el del subsistema mecánico.
+
+%__________________________ SUBSECCIÓN
+\subsection{Resultados con amortiguamiento}
+\label{subsec:res_grua}
+
+La configuración de parámetros para la grúa han sido ya definidos en la Tabla~\ref{tab:HCpp}.
+Como en el caso del oscilador lineal, se ha limitado la diferencia entre la fuerza que sale del subsistema hidráulico y la fuerza calculada por el estimador en $55\unit{N}$ para evitar inestabilidades en la co-simulación de este sistema.
+
+
+Los coeficientes del estimador obtenidos tras 10 iteraciones son:
+$\coefficients = \sqbr{\matr{ccc}{653.6598 & 1.5391 & -0.6121}}$.
+
+
+\begin{figure}[ht!]\centering
+	\includegraphics[]{./plots/hc-figure0.pdf}
+	\caption{Desplazamiento del actuador hidráulico.}
+	\label{fig:GruaPos}
+\end{figure}
+
+La Figura~\ref{fig:GruaPos} muestra como la posición obtenida tras la aplicación del estimador sigue mejor la solución de referencia, aunque no llegan a solaparse.
+La presencia de amortiguamiento en el subsistema hidráulico además sirve para que las amplitudes no puedan crecer como sí lo hacía en el oscilador lineal.
+
+
+\begin{figure}[ht!]\centering
+	\includegraphics[]{./plots/hc-figure1.pdf}
+	\caption{Velocidad del actuador hidráulico.}
+	\label{fig:GruaVel}
+\end{figure}
+
+De una forma análoga, la Figura~\ref{fig:GruaVel} representa la velocidad obtenida en el actuador hidráulico en el entorno de co-simulación.
+La solución co-simulada ya casi se solapaba con la solución de referencia, y el uso del estimador mejora algo la solución original.
+
+\begin{figure}[ht!]\centering
+	\includegraphics[]{./plots/hc-figure2.pdf}
+	\caption{Fuerza de acoplamiento de la grúa hidráulica.}
+	\label{fig:GruaFor}
+\end{figure}
+
+Por último, la Figura~\ref{fig:GruaFor} representa la fuerza que aplica el actuador hidráulico sobre el subsistema mecánico.
+En este caso el uso de estimador empeora los resultados de la fuerza de acoplamiento, pero mejora los resultados de la posición y velocidad del actuador hidráulico.
+
+\commentIF{Con 10s no se ve nada, ¿se puede poner menos tiempo, pero más zoom?}
+
+\commentFG{Desde luego, el objetivo de las gráficas es que queden claros los resultados.}

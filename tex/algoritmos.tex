@@ -1,0 +1,103 @@
+% !TeX spellcheck = es_ES
+
+%__________________________ CAPÍTULO
+\chapter{Descripción de los algoritmos utilizados}
+\label{ch:algoritmos}
+
+\commentIF{Escribir una introducción aquí}
+
+\commentFG{Cierto, habrá que darle un poco de contexto. Una duda que me surge: hablas de estimadores lineales. Al menos uno de los sistemas que vas a intentar estabilizar es claramente no lineal... ¿esperamos que funcionen?}
+
+\commentFG{Mi ayuda con esta parte irá sobre todo en la línea de preguntar las cosas que no entienda.}
+
+%__________________________ SECCIÓN
+\section{Estimadores polinómicos}
+
+Los estimadores son expresiones matemáticas donde se intentan aproximar valores de una variable en función de una o más variables de la forma:
+%
+\begin{equation}
+    \estimated \approx \mathcal{F}(\estimation)
+\end{equation}
+%
+donde $\mathcal{F}$ es la función que aproxima el valor de la variable a estimar $\estimated$, con los valores disponibles de las variables estimadoras $\estimation$.
+
+\commentFG{Una cosa: si el párrafo que va después de la ecuación no está unido a ella en el código te va a quedar una indentación al principio, que no queda muy bien en el texto. Para evitar eso, es necesario que no haya líneas en blanco entre el texto y la ecuación. Yo suelo resolverlo poniendo un comentario -mira la diferencia entre (7.1) y (7.2).}
+
+Particularizando la expresión anterior para el caso en el que la función estimadora $\mathcal{F}$ sea un polinomio de coeficientes constantes, el estimador puede expresarse de la siguiente manera:
+%
+\begin{equation}
+    \estimated \approx \coefficients \estimation = \sqbr{\hvect{cccc}{\coefficient_0 & \coefficient_1 & \hdots & \coefficient_{n-1}}} \estimation
+\end{equation}
+
+donde $\estimation$ es el vector de tamaño $n$ que incluye los valores conocidos que pueden estar referidos al instante actual o también a instantes pasados, y $\coefficients$ es el vector de coeficientes del estimador que deben ser calculados para cada aplicación. Los valores contenidos en $\estimation$ no tienen que ser necesariamente los valores disponibles originales, sino que podrían ser, por ejemplo, potencias de estos valores.
+
+Para el cálculo de los coeficientes de un estimador polinómico, se pueden calcular a través de un ajuste por mínimos cuadrados de la siguiente manera:
+%
+\begin{equation}
+    \coefficients = (\estimation\trans \estimation)\inv \estimation\trans \estimated
+    \label{eq:alpha}
+\end{equation}
+
+donde $()\inv$ representa comúnmente a la pseudoinversa en lugar de la inversa, debido a que el sistema de ecuaciones puede no ser compatible determinado.
+
+%__________________________ SECCIÓN
+\subsection{Estimador lineal propuesto}
+
+El estimador propuesto es un polinomio de primer orden que usa como entradas los valores de la fuerza calculados como outputs en el instante actual $t_k$ y en el instante anterior $t_{k-1}$. Se incluirá un término independiente correspondiente a $\coefficient_0$ de la forma:
+%
+\begin{equation}
+    \estimated \approx \coefficients \estimation = \sqbr{\hvect{ccc}{\coefficient_0 & \coefficient_1 & \coefficient_2}} \sqbr{\cvvect{1 \\ \forceMod (t_k) \\ \forceMod (t_{k-1})}} = \coefficient_0 + \sqbr{\hvect{cc}{\coefficient_1 & \coefficient_2}} \sqbr{\cvvect{\forceMod (t_k) \\ \forceMod (t_{k-1})}}
+\end{equation}
+
+donde $\forceMod (t_k)$ y $\forceMod (t_{k-1})$ corresponden a los valores de la fuerza obtenidos directamente como outputs del subsistema que presenta direct feedthrough, y que por lo tanto introducen importantes errores en el esquema de co-simulación al usar estos valores como inputs en la integración numérica del subsistema que no presenta direct feedthrough.
+
+
+%__________________________ SECCIÓN
+\subsection{Aplicación del estimador en un entorno de co-simulación}
+
+El cálculo de los coeficientes del estimador se debe llevar a cabo a través de la Ecuación~\eqref{eq:alpha}. Para ello es necesario almacenar los datos de las fuerzas de acoplamiento entre los dos subsistemas para cada instante de tiempo obtenidos durante la co-simulación, y que serán guardados en la matriz $\estimation$ de la forma
+%
+\begin{equation}
+    \estimation = \sqbr{\matr{cccc}
+    {1 & \forceMod (t_m) & \dots &\forceMod (t_0) \\
+    1 & \forceMod (t_{m+1}) & \dots & \forceMod (t_1) \\
+    \vdots & \vdots & \vdots &\vdots}} 
+\end{equation}
+
+además será necesario obtener un vector que almacene los valores de la variable a corregir a través de una solución analítica si existe, o una monolítica con un paso de integración adecuado para minimizar los errores numéricos del integrador.
+%
+\begin{equation}
+    \estimated = \sqbr{\matr{c}
+    {\forceMod^{ref} (t_m) \\ \forceMod^{ref} (t_{m+1}) \\ \vdots}} 
+\end{equation}
+%
+donde $()^{ref} (\ctime_m)$ denota la solución de referencia obtenida para la variable a corregir en el instante de tiempo $\ctime_m$.
+
+La Figura~\ref{fig:FScorr} representa el esquema de corrección propuesto para la aplicación del estimador polinómico, donde $\forceCorr$ es la fuerza ya corregida que recibiría el sistema que no presenta direct feedthrough. 
+Los estimadores lineales pueden ser utilizados para estimar y corregir magnitudes que presentan una dependencia lineal o que puede aproximarse a lineal en la mayor parte de su funcionamiento.
+
+\begin{figure}[ht!]\centering
+	\includegraphics[]{./figs/schemes-figure5.pdf}
+	\caption{Esquema de un acoplamiento fuerza-desplazamiento con corrección en un entorno de co-simulación.}
+	\label{fig:FScorr}
+\end{figure}
+
+En la Figura~\ref{fig:Estimador} se muestra el diagrama de entradas y salidas del estimador para un instante de tiempo dado como $\ctime$. 
+En esta aplicación se ha establecido que las entradas del estimador serán las fuerzas en el instante actual e inmediatamente anterior, es decir, la fuerza corregida en el instante actual se calcula en función de la fuerza aproximada que ha devuelto el subsistema con direct feedthrough en dos instantes de tiempo consecutivos.
+
+\begin{figure}[ht!]\centering
+	\includegraphics[]{./figs/schemes-figure6.pdf}
+	\caption{Funcionamiento de un estimador linear que usa la fuerza en $\ctime^{\step}$ y $\ctime^{\step - 1}$.}
+	\label{fig:Estimador}
+\end{figure}
+
+La aplicación de este enfoque en un entorno de co-simulación obliga a que el proceso sea iterativo, debido a que la modificación en cada instante de la fuerza que recibe el sistema sin direct feedthrough cambia la dinámica del sistema co-simulado.
+Así, se puede establecer un criterio de parada cuando diferencia de la norma de los coeficientes del estimador varían por debajo de un valor umbral. Otro criterio podría ser el uso de las variables de acoplamiento o si se dispone de un valor de la energía total del sistema para comparar entre dos iteraciones consecutivas.
+
+Otro punto a tener en cuenta, es que es necesario limitar la corrección que aplica el estimador, es decir, la diferencia entre la fuerza devuelta por el subsistema con direct feedthrough y la salida del estimador.
+Esta limitación surge de que muchos sistemas no permiten grandes variaciones en la fuerza de acoplamiento sin volverse inestables, y por este motivo es necesario seleccionar un valor máximo de corrección que será dependiente del tipo de sistema y de la presencia o no de amortiguamiento que permitiría usar rangos más amplios, ya que la disipación de energía ayudaría a estabilizar el sistema pese a usar correcciones más grandes.
+
+% __________________________ SECCIÓN
+\section{BB}
+
+\commentIF{Hablar con Becerra para que explique cómo implementar el otro algoritmo}

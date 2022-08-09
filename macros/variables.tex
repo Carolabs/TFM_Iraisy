@@ -1,0 +1,88 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 				    MACROS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Parentheses
+\newcommand{\plbr}[1]	            { \left( #1 \right) }
+\newcommand{\sqbr}[1]	            { \left[ #1 \right] }
+\newcommand{\lcubr}[1]	            { \left\{ #1 \right.}
+
+% Vectors and matrices
+\newcommand{\cvvect}[1]	            { \begin{array}{c} #1 \end{array} }
+\newcommand{\hvect}[2]	            { \begin{array}{ #1 } #2 \end{array} }
+\newcommand{\matr}[2]	            { \begin{array}{ #1 } #2 \end{array} }
+
+% Units
+\newcommand{\unit}[1]				{ {\; \mathrm {#1}} }
+\newcommand{\point}[1]				{ \mathsf{ #1 } }
+
+% General notation
+\newcommand{\ctime}					{ t }
+\newcommand{\stepSize}				{ {\textrm d} \ctime}
+\newcommand{\step}                  { k }
+
+
+% Co-simulation notation - fundamentals
+\newcommand{\state}					{ \mathbf{ x } }
+\newcommand{\derivative}            { \dot{\state} }
+\newcommand{\inputMod}				{ u }
+\newcommand{\outputMod}				{ y }
+\newcommand{\forceMod}				{ f }
+\newcommand{\inputs}				{ { \inputMod} }
+\newcommand{\outputs}				{ { \outputMod} }
+\newcommand{\force}					{ { \forceMod} }
+\newcommand{\microstep}				{ h }
+\newcommand{\communicationstep}		{ H }
+\newcommand{\forceCorr}             { \tilde{\forceMod} }
+\newcommand{\nextApproxInput}       { \tilde{\inputs} }
+
+% Subscripts and superscripts
+\newcommand{\trans}   				{ ^{\textrm T}}
+\newcommand{\inv}   				{ ^{\textrm -1}}
+\newcommand{\extr}   				{ ^{\textrm *}}
+
+
+% Schemes
+\newcommand{\angles}				{ \theta }
+\newcommand{\cyldisplacement}		{ s_c }
+\newcommand{\cylvelocity}			{ \dot{s}_c }
+\newcommand{\discharge}				{ c_d }
+\newcommand{\density}     			{ \rho }
+\newcommand{\bulkMod}				{ \beta }
+\newcommand{\outputValve}			{ a_o }
+\newcommand{\inputValve}			{ a_i }
+\newcommand{\compressibilityA}		{ a }
+\newcommand{\compressibilityB}		{ b }
+\newcommand{\spool}					{ \gamma }
+\newcommand{\cyldisplacementIni}	{ s_c^0 }
+\newcommand{\amplitude}				{ A }
+\newcommand{\angular}				{ \omega }
+\newcommand{\pressure}				{ p }
+\newcommand{\power}                 { P }
+\newcommand{\Residualpower}         { \delta \power }
+\newcommand{\stiffness}				{ \kappa }
+\newcommand{\damping}				{ c }
+\newcommand{\mass}					{ m }
+\newcommand{\length}				{ l }
+\newcommand{\displacement}			{ \eta }
+\newcommand{\velocity}				{ \dot{\eta} }
+\newcommand{\acceleration}			{ \ddot{\eta} }
+\newcommand{\piston}				{ a_p }
+\newcommand{\matLO}					{ \bm{\Theta} }
+
+
+% State-space - fundamentals
+\newcommand{\stateMatrix}			{ \mathbf{A} }
+\newcommand{\inputMatrix}			{ \mathbf{B} }
+\newcommand{\outputMatrix}			{ \mathbf{C} }
+\newcommand{\feedthrough}			{ \mathbf{D} }
+
+% Matrices
+\newcommand{\identity}				{ \mathbf{I} }
+\newcommand{\zero}					{ \mathbf{0} }
+
+% Estimadores
+\newcommand{\estimation}            { \mathbf{X} }
+\newcommand{\estimated}             { Y }
+\newcommand{\coefficient}           { \alpha}
+\newcommand{\coefficients}          { \bm{\coefficient}}
