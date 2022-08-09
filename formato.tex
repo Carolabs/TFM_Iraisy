@@ -1,0 +1,74 @@
+\usepackage{blindtext}
+%\usepackage[latin1]{inputenc}
+\usepackage[spanish,es-lcroman,es-nosectiondot]{babel}
+%------------------------------------------------------
+\usepackage{array,amssymb,amsthm,amsmath,amstext}
+\usepackage[font=small,bf]{caption}% Formato del caption
+\usepackage{colortbl}% permite colorear tablas
+\usepackage{fancyhdr}
+\usepackage{fancyvrb}
+\usepackage{graphicx}
+\usepackage{pdfpages}
+\usepackage{setspace,subfigure}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=magenta]{hyperref}
+% Fuente ----------------------------------------------------------
+\usepackage{helvet}
+\renewcommand*\familydefault{\sfdefault} 
+%------------------------------------------------------------------
+% Comandos personales
+\spanishdecimal{.}
+\renewcommand{\spanishtablename}{Tabla}
+\newcommand\crule[3][black]{\textcolor{#1}{\rule{#2}{#3}}}
+\allowdisplaybreaks
+\renewcommand{\refname}{Referencias}
+
+
+% Formato hoja----------------------------------------------
+\renewcommand{\baselinestretch}{1.25}% interlineado
+\headsep 15.5mm      \topmargin -2cm    \textheight 24.5cm     \textwidth 16cm    \oddsidemargin 0.04 cm      \evensidemargin -0.5cm
+\footnotesep=20pt   \footskip=40pt
+% Formato de las cabaceras de página -----------------------------------------------------------------
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{} % borrar todos los ajustes
+\fancyfoot[C]{\textbf{\scriptsize\thepage}}
+% Modifica el ancho de las líneas de cabecera y pie
+\renewcommand{\headrulewidth}{0pt}
+%\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\footrule}{\hrule height 0.4pt \vspace{4mm}}
+%----------------------------------------------------------------------------------------------------------------
+\usepackage{chngcntr}
+\numberwithin{equation}{section}
+\counterwithin{table}{section}% Numera las tablas por secciones
+\counterwithin{figure}{section}% Numera las figuras por secciones
+%--------------------------------------------------------------------
+\setcounter{lofdepth}{2}% Introduce las subfiguras en lof
+\allowdisplaybreaks
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Incluye la bibliografía como sección
+\makeatletter
+\renewenvironment{thebibliography}[1]
+     {\section{\refname}% esta línea cambia la bibliografía a la categoría sección
+      \@mkboth{\MakeUppercase\bibname}{\MakeUppercase\bibname}
+      \list{\@biblabel{\@arabic\c@enumiv}}%
+           {\settowidth\labelwidth{\@biblabel{#1}}
+            \leftmargin\labelwidth
+            \advance\leftmargin\labelsep
+            \@openbib@code
+            \usecounter{enumiv}
+            \let\p@enumiv\@empty
+            \renewcommand\theenumiv{\@arabic\c@enumiv}}
+      \sloppy
+      \clubpenalty4000
+      \@clubpenalty \clubpenalty
+      \widowpenalty4000%
+      \sfcode`\.\@m}
+     {\def\@noitemerr
+       {\@latex@warning{Empty `thebibliography' environment}}
+      \endlist}
+\makeatother
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\renewcommand\thesection{\arabic{section}}

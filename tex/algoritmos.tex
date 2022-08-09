@@ -1,7 +1,7 @@
 % !TeX spellcheck = es_ES
 
 %__________________________ CAPÍTULO
-\chapter{Descripción de los algoritmos utilizados}
+\section{Descripción de los algoritmos utilizados}
 \label{ch:algoritmos}
 
 \commentIF{Escribir una introducción aquí}
@@ -11,7 +11,7 @@
 \commentFG{Mi ayuda con esta parte irá sobre todo en la línea de preguntar las cosas que no entienda.}
 
 %__________________________ SECCIÓN
-\section{Estimadores polinómicos}
+\subsection{Estimadores polinómicos}
 
 Los estimadores son expresiones matemáticas donde se intentan aproximar valores de una variable en función de una o más variables de la forma:
 %
@@ -41,7 +41,7 @@ Para el cálculo de los coeficientes de un estimador polinómico, se pueden calc
 donde $()\inv$ representa comúnmente a la pseudoinversa en lugar de la inversa, debido a que el sistema de ecuaciones puede no ser compatible determinado.
 
 %__________________________ SECCIÓN
-\subsection{Estimador lineal propuesto}
+\subsubsection{Estimador lineal propuesto}
 
 El estimador propuesto es un polinomio de primer orden que usa como entradas los valores de la fuerza calculados como outputs en el instante actual $t_k$ y en el instante anterior $t_{k-1}$. Se incluirá un término independiente correspondiente a $\coefficient_0$ de la forma:
 %
@@ -53,7 +53,7 @@ donde $\forceMod (t_k)$ y $\forceMod (t_{k-1})$ corresponden a los valores de la
 
 
 %__________________________ SECCIÓN
-\subsection{Aplicación del estimador en un entorno de co-simulación}
+\subsubsection{Aplicación del estimador en un entorno de co-simulación}
 
 El cálculo de los coeficientes del estimador se debe llevar a cabo a través de la Ecuación~\eqref{eq:alpha}. Para ello es necesario almacenar los datos de las fuerzas de acoplamiento entre los dos subsistemas para cada instante de tiempo obtenidos durante la co-simulación, y que serán guardados en la matriz $\estimation$ de la forma
 %
@@ -98,6 +98,6 @@ Otro punto a tener en cuenta, es que es necesario limitar la corrección que apl
 Esta limitación surge de que muchos sistemas no permiten grandes variaciones en la fuerza de acoplamiento sin volverse inestables, y por este motivo es necesario seleccionar un valor máximo de corrección que será dependiente del tipo de sistema y de la presencia o no de amortiguamiento que permitiría usar rangos más amplios, ya que la disipación de energía ayudaría a estabilizar el sistema pese a usar correcciones más grandes.
 
 % __________________________ SECCIÓN
-\section{BB}
+\subsection{BB}
 
 \commentIF{Hablar con Becerra para que explique cómo implementar el otro algoritmo}

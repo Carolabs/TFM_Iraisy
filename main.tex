@@ -1,66 +1,12 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 				GENERAL
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\documentclass[a4paper,11pt,oneside]{memoir}
-\setulmarginsandblock{2.5cm}{*}{*} % Márgenes superior e inferior
-\setlrmarginsandblock{2.5cm}{*}{*} % Márgenes laterales
-\checkandfixthelayout              % Imprescindible para que los \set*margins... funcionen
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 				FONTS AND UNITS
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Definición de fuentes: Arial (helvética) como fuente por defecto.
-\usepackage[scaled]{helvet}
-\usepackage[helvet]{sfmath}
-\renewcommand\familydefault{\sfdefault} 
-\usepackage[T1]{fontenc}
+\documentclass[10pt,a4paper]{article}
+\include{formato}
+\usepackage[utf8]{inputenc}
 \usepackage{commath}
-\usepackage{booktabs}
 \usepackage{bm}
+\include{datos}
 \input{./macros/colours}
 \input{./macros/variables}
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 				GRAPHICS
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage{graphicx}
-\usepackage{tikz}               % TikZ y pgfplots Para gráficas
-\usepackage{pgfplots}
-\pgfplotsset{compat=1.18}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 				COLORS
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage{xcolor}
-\definecolor{udccolor}{HTML}{CE0070}
-
-\usepackage[spanish]{babel}
-\renewcommand{\spanishtablename}{Tabla}
-
-\makechapterstyle{EPSstyle}{
-  \renewcommand{\chapnamefont}{\color{udccolor}\normalfont\Large\scshape\bfseries}
-  \renewcommand{\chapnumfont}{\color{udccolor}\normalfont\Large\scshape\bfseries}
-  \renewcommand{\chaptitlefont}{\color{udccolor}\normalfont\Large\scshape\bfseries}
-  \renewcommand{\printchaptername}{}
-  \renewcommand{\chapternamenum}{}
-  \renewcommand{\printchapternum}{\chapnumfont \thechapter}
-  \renewcommand{\afterchapternum}{. }
-}
-\chapterstyle{EPSstyle}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 				BINDINGS
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\setcounter{tocdepth}{2} % profundidad de tabla de contenido (hasta subsection)
-\setcounter{secnumdepth}{2} % numeracion de esa profundidad
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 				OTHERS
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage{cite}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 				COMMENTS
@@ -71,35 +17,125 @@
 \newcommand{\commentIF}[1]{\textcolor[rgb]{0.0,0.0,0.8}{\textbf{IF: #1}}}
 
 
+%------------------------------------------------------
 \begin{document}
 
+% PORTADA ----------------------------------------------------------------------------------------------------------------------
+\thispagestyle{empty}
+
+\hspace{4.7cm}
+\begin{minipage}{0.23\textwidth}
+%\hspace{0.4cm}\crule[magenta]{0.5cm}{0.5cm}\hspace{0.1cm}\crule[magenta]{0.5cm}{0.5cm} 
+
+%\vspace{0.01cm}
+
+%\crule[magenta]{3.3cm}{0.35cm}
+
+%\vspace{0.01cm}
+
+%\crule[magenta]{3.3cm}{0.35cm} 
+\end{minipage}
+%---------------------------
+\begin{minipage}{0.28\textwidth}
+
+\includegraphics[scale=0.4]{pics/EUP.png}
+
+%\noindent\textcolor{black!45}{\scalebox{1.35}[1.35]{ \bf \hspace{1pt}escola\textcolor{black!65}{universitaria}}}
+
+%\vspace{0.1cm}
+
+%\noindent\textcolor{black}{\scalebox{1.83}[2.05]{ \bf POLITÉCNICA}}
+\end{minipage}
+
+%%%%%%%%%%%%%%%%%%%%% 
+\vspace{1cm}
+%%%%%%%%%%%%%%%%%%%%%%
+%\begin{minipage}{0.38\textwidth}
+%\noindent\textcolor{black}{\scalebox{1.35}[2.8]{ \bf Universidade da Coruña}}
+%\end{minipage}
+%------------------------------------
+\hspace{3.4cm}
+\begin{minipage}{0.25\textwidth}
+%\centering
+\includegraphics[scale=0.3]{pics/udc_logo.png}
+\end{minipage}
+
+\large
+
+\vspace{3cm}
+
+\begin{center}
+\begin{tabular}{rl}
+ \colorbox{lightgray}{TÍTULO}     &	\titulouno         \\[10pt]
+                                  &	\titulodos         \\[10pt]
+                                  &	\titulotres        \\
+                                  &                    \\
+						 	                    &                    \\
+							                    &                    \\
+\colorbox{lightgray}{MÁSTER}			& \gradomaster       \\
+% borrar la parte que no proceda
+                                  &                    \\
+                                  &                    \\
+\colorbox{lightgray}{ASIGNATURA}  & \asignatura        \\
+                                  &                    \\
+                                  &  \\
+							                    &  \\
+							                    &  \\
+\colorbox{lightgray}{ALUMNA}      &	\alumnouno         \\[10pt]
+\colorbox{lightgray}{DIRECTOR}      &	\directoruno         \\
+& \directordos         \\[10pt]
+												&	 \\
+                                  &  \\
+							                    &  \\
+                                  &  \\
+							                    &  \\
+
+\colorbox{lightgray}{FECHA}       &	\fecha
+\end{tabular}
+\end{center}
+\normalsize
+% FIN DE LA PORTADA -----------------------------------------------------------------------------------------------------------------------------------
+\newpage
+% Índice -----------------------------------------------------------------------------------------------------------------------------------
+\thispagestyle{plain}
+
+% Índice de contenidos
+\renewcommand{\contentsname}{Índice}
+{\hypersetup{hidelinks}\tableofcontents}
+
+
+% Listado de figuras
+\newpage
+\phantomsection
+\renewcommand*\listfigurename{Listado de figuras}
+{\hypersetup{hidelinks}\listoffigures}
+\addtocontents{lof}{\protect\thispagestyle{fancy}}
+
+% Listado de tablas
+\newpage
+\phantomsection
+\renewcommand*\listtablename{Listado de tablas}
+{\hypersetup{hidelinks}\listoftables}
+\addtocontents{lot}{\protect\thispagestyle{fancy}}
+
+% Final del índice -----------------------------------------------------------------------------------------------------------------------------------
+
+
+\newpage
+
+%\addcontentsline{toc}{section}{Introducción}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 				FIRST PAGE
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\include{tex/portada}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 				MAIN
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\tableofcontents*
-\clearpage
-\listoffigures
-\clearpage
-\renewcommand{\listtablename}{Índice de tablas}
-\listoftables
-\mainmatter
-
-%% En el documento, espaciado de 6pt entre párrafos
-\setlength{\parskip}{6pt}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 			 CONTENT
+% 			 Resumen del trabajo
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \include{tex/resumenES}
-\include{tex/resumenGL}
 \include{tex/resumenEN}
+\include{tex/resumenGL}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 			 Desarrollo del trabajo
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \include{tex/introducion}
 \include{tex/estado}
 \include{tex/objeto}
@@ -109,13 +145,12 @@
 \include{tex/resultados}
 \include{tex/conclusiones}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 			 APPENDICES
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\appendix
-\include{tex/apendice}
+\vspace{1cm}
 
-\bibliographystyle{ieeetr}  
-\bibliography{bib.bib}
+
+
+\bibliographystyle{ieeetr}
+\bibliography{bib}
+
 
 \end{document}

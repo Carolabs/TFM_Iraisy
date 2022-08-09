@@ -3,7 +3,7 @@
 
 
 %__________________________ CAPÍTULO
-\chapter{Ejemplos de benchmark utilizados}
+\section{Ejemplos de benchmark utilizados}
 \label{ch:ejemplos}
 
 \commentFG{Además de presentar los ejemplos, en algún momento (no sé si aquí o más adelante) hay que describir también qué maniobras se van a emplear con cada uno de ellos, tanto para ajustar los controladores como para verificar su funcionamiento. }
@@ -11,7 +11,7 @@
 En esta sección se presentan los dos ejemplos de benchmark que van a ser usados para evaluar y validar los métodos de corrección de la co-simulación.
 
 %__________________________ SECCIÓN
-\section{Oscilador lineal}
+\subsection{Oscilador lineal}
 \label{sec:oscilador}
 
 El primer ejemplo de benchmark es un oscilador lineal de dos grados de libertad, como se muestra en la Figura~\ref{fig:OsciladorLinealMono}, un sistema ampliamente utilizado en la literatura de co-simulación \cite{Gonzalez2011,Schweizer2015,Gomes2018,Gonzalez2019}.
@@ -131,7 +131,7 @@ La dinámica del subsistema $\mathcal{M}_2$, a su vez, se puede escribir como
 Como ya ha sido mencionado, en principio, $\forceMod \neq \forceMod\extr$, $\displacement_2 \neq \displacement_2\extr$ y $\velocity_2 \neq \velocity_2\extr$, debido a la extrapolación de las entradas o algún otro tipo de procesamiento que pueda ser realizado por el manager de co-simulación.
 
 %__________________________ SECCIÓN
-\section{Oscilador no lineal}
+\subsection{Oscilador no lineal}
 \label{sec:osciladorNL}
 
 El segundo ejemplo de referencia es otra variación del oscilador lineal descrito en la Sección~\ref{sec:oscilador}, en el que los tres resortes y amortiguadores se pueden reemplazar por modelos no lineales, transformándolo así en un oscilador no lineal.
@@ -182,7 +182,7 @@ Los desplazamientos y las velocidades iniciales de las masas fueron los mismos q
 \end{table}
 
 %__________________________ SECCIÓN
-\section{Grúa hidráulica}
+\subsection{Grúa hidráulica}
 \label{sec:grua}
 
 El tercer ejemplo de benchmark es una grúa hidráulica que consiste en un sistema multifísico de dos grados de libertad compuesto por un brazo robótico de dos barras accionado con un cilindro hidráulico, como se muestra en la Figura~\ref{fig:GruaMono}.
