@@ -14,3 +14,4 @@
 *.toc
 /main.pdf
 *.dep
+/code/LO/__pycache__/*
