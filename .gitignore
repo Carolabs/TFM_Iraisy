@@ -15,3 +15,4 @@
 /main.pdf
 *.dep
 /code/LO/__pycache__/*
+*.pyc
