@@ -124,11 +124,22 @@ Por último, la Figura~\ref{fig:OsciladorLinealEnergia2} representa el exceso de
 \subsection{Oscilador no lineal}
 \label{sec:res_osciladorNL}
 
+El segundo ejemplo estudiado será el oscilador no lineal de dos grados de libertad que se ha descrito en la Sección~\ref{sec:osciladorNL}. 
+
+Los resultados presentados para este ejemplo fueron obtenidos con un entorno de co-simulación con esquema Jacobi single-rate, donde todos los pasos de integración fueron fijados a $1\unit{ms}$ y con acoplamiento fuerza-desplazamiento. 
+
+Debido a que la respuesta de los resortes y amortiguadores es no lineal, no existe una solución analítica como en el caso del oscilador lineal.
+La no existencia de una solución analítica obliga al uso de una solución de referencia aproximada que en este ejemplo ha sido por convergencia, es decir, usar los resultados de la co-simulación reduciendo reducir el paso de tiempo hasta que convergen al valor real.
+En esta Sección la solución de referencia ha sido obtenida con un paso de tiempo de $1\unit{\mu s}$ 
+
+
 %__________________________ SUBSECCIÓN
 \subsubsection{Oscilador no lineal Caso 1: resorte no lineal}
 \label{subsec:res_osciladorNL1}
 
-
+El primer caso presenta una configuración de parámetros sin disipación como describe la Tabla~\ref{tab:DNLOpp} para el modelo de fuerzas de resorte no lineales.
+Para realizar la corrección ha sido necesario limitar la diferencia entre la fuerza que sale del subsistema 2 y la fuerza calculada por el estimador en $2\unit{N}$ para evitar inestabilidades en la co-simulación.
+Este valor es muy inferior al caso lineal ya que las fuerzas originales son, en general, también inferiores.
 Los coeficientes del estimador obtenidos tras 10 iteraciones son:
 $\coefficients = \sqbr{\matr{ccc}{-0.7552 & 5.2456 & -4.2507}}$.
 
@@ -144,11 +155,18 @@ $\coefficients = \sqbr{\matr{ccc}{-0.7552 & 5.2456 & -4.2507}}$.
 	\label{fig:OsciladorNoLinealVel1}
 \end{figure}
 
+En la Figura~\ref{fig:OsciladorNoLinealPos1} se muestra como el estimador lineal es capaz de corregir los valores de la posición de la masa 2 $\displacement_2$, y evitar el efecto de \textit{lag} que presenta la co-simulación no corregida.
+Es importante mencionar que pese a que el sistema es claramente no lineal y el estimador lineal, éste es capaz de mejorar los resultados originales eliminando el efecto de aumento de amplitud introducido por el esquema de co-simulación.
+De forma análoga, la Figura~\ref{fig:OsciladorNoLinealVel1} presenta los resultados corregidos de la velocidad de la masa 2 $\velocity_2$.
+
+
 \begin{figure}[ht!]\centering
 	\includegraphics[]{./plots/nlo-figure2.pdf}
 	\caption{Fuerza de acoplamiento del oscilador lineal para el Caso 1.}
 	\label{fig:OsciladorNoLinealFor1}
 \end{figure}
+
+La fuerza de acoplamiento en este caso también mejora disminuyendo el error con el valor de referencia al aplicar la corrección basada en este estimador como se muestra en la Figura~\ref{fig:OsciladorNoLinealFor1}.
 
 \begin{figure}[ht!]\centering
 	\includegraphics[]{./plots/nlo-figure3.pdf}
@@ -156,10 +174,19 @@ $\coefficients = \sqbr{\matr{ccc}{-0.7552 & 5.2456 & -4.2507}}$.
 	\label{fig:OsciladorNoLinealEnergia1}
 \end{figure}
 
+En la  Figura~\ref{fig:OsciladorNoLinealEnergia1} se observa el deterioro de la solución como en el caso lineal sin amortiguamiento, presentando una deriva incrementando su energía y amplitudes en su respuesta hasta hacerlo inestable.
+La corrección aplicada permite eliminar parte de este error manteniendo su energía próxima al valor de referencia.
+Sin embargo, alrededor del segundo $6$ presenta un salto en el valor de la energía del sistema tras la corrección como también ocurre en \cite{Rodriguez2022} aplicando un algoritmo de corrección basado en la potencia intercambiada en la interfaz de co-simulación.
+
+
+
 %__________________________ SUBSECCIÓN
 \subsubsection{Oscilador no lineal Caso 2: amortiguamiento cuadrático}
 \label{subsec:res_osciladorNL2}
 
+El segundo caso corresponde con los parámetros con disipación descritos en la Tabla~\ref{tab:DLOpp}.
+A diferencia del caso anterior, la fuerza del resorte es lineal, pero el amortiguamiento es cuadrático con la velocidad.
+La limitación de la corrección en este escenario no es tan crítica como ya ocurría en el oscilador lineal y se ha limitado a $20\unit{N}$, debido a que la presencia de disipación ayuda a estabilizar la dinámica del sistema evitando inestabilidades.
 Los coeficientes del estimador obtenidos tras 10 iteraciones son:
 $\coefficients = \sqbr{\matr{ccc}{-0.3983 & 1.9719 &-0.9872}}$.
 
@@ -175,11 +202,17 @@ $\coefficients = \sqbr{\matr{ccc}{-0.3983 & 1.9719 &-0.9872}}$.
 	\label{fig:OsciladorNoLinealVel2}
 \end{figure}
 
+Las Figuras~\ref{fig:OsciladorNoLinealPos2} y \ref{fig:OsciladorNoLinealVel2} presentan el efecto de la aplicación de la corrección basada en este estimador.
+A diferencia del Caso 1, los resultados sin corrección no presentan \textit{lag}, pero si un exceso de amplitud que son eliminados tras la corrección.
+
+
 \begin{figure}[ht!]\centering
 	\includegraphics[]{./plots/nlo-figure6.pdf}
 	\caption{Fuerza de acoplamiento del oscilador lineal para el Caso 2.}
 	\label{fig:OsciladorNoLinealFor2}
 \end{figure}
+
+En cuanto a la fuerza de acoplamiento, en la Figura~\ref{fig:OsciladorLinealFor2} se muestra como la corrección reduce los excesos de amplitud del sistema sin corregir, permitiendo resultados más precisos en sus valores.
 
 \begin{figure}[ht!]\centering
 	\includegraphics[]{./plots/nlo-figure7.pdf}
@@ -187,11 +220,17 @@ $\coefficients = \sqbr{\matr{ccc}{-0.3983 & 1.9719 &-0.9872}}$.
 	\label{fig:OsciladorNoLinealEnergia2}
 \end{figure}
 
+
+Por último, la Figura~\ref{fig:OsciladorLinealEnergia2} representa la energía del oscilador no lineal para este escenario.
+Puede observarse como el sistema original co-simulado evoluciona con un exceso de energía frente al valor de referencia, y este exceso es responsable de los errores en las amplitudes de posición y velocidad.
+La corrección es capaz de eliminar este exceso de energía manteniendo el sistema corregido muy próximo al valor real de la energía.
+
+
 %__________________________ SECCIÓN
 \subsection{Grúa Hidráulica}
 \label{sec:res_grua}
 
-El segundo ejemplo estudiado será la grúa hidráulica de dos de libertad que se ha descrito en la Sección~\ref{sec:grua}. 
+El tercer ejemplo estudiado será la grúa hidráulica de dos de libertad que se ha descrito en la Sección~\ref{sec:grua}. 
 
 Los resultados presentados para este ejemplo fueron obtenidos con un entorno de co-simulación con esquema Jacobi multi-rate, donde el paso de integración del subsistema mecánico está fijado en $10\unit{ms}$ y $100\unit{\mu s}$ para el subsistema hidráulico y con acoplamiento fuerza-desplazamiento.
 

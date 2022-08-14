@@ -70,10 +70,10 @@
 		xmin = 9,
 		xmax = 10,
 		ylabel = {Velocidad $\velocity_2$, [m/s]},
-		ymin = -125,
-		ymax = 125,
+		ymin = -150,
+		ymax = 150,
 		xtick distance = 1,
-		ytick distance = 25,
+		ytick distance = 50,
 		%restrict x to domain = 0:10,
 		%restrict y to domain = -10:10,
 		ylabel near ticks,
@@ -147,21 +147,21 @@
 			/tikz/.cd
 		},
 		xlabel = {$\ctime$ [s]},
-		legend style={at={(0.975,.975)},anchor=north east},
+		legend style={at={(0.025,.975)},anchor=north west},
 		legend cell align={left},
-		xmin = 9,
+		xmin = 0,
 		xmax = 10,
 		ylabel = {Energía, [J]},
 		ymin = 9000,
-		ymax = 11000,
+		ymax = 20000,
 		xtick distance = 1,
-		ytick distance = 500,
+		ytick distance = 2500,
 		%restrict x to domain = 0:10,
 		%restrict y to domain = -10:10,
 		ylabel near ticks,
 		xlabel near ticks]
 		
-		\addplot[color = Orange, line width = 1pt, dotted]
+		\addplot[color = Orange, line width = 1pt]
 		table[skip first n = 0, x = Time, y = E_ref, col sep = comma] 
 		{./lo_noDis.csv};
 		
@@ -169,7 +169,7 @@
 		table[skip first n = 0, x = Time, y = E*, col sep = comma] 
 		{./cosim_noDis.csv};
 		
-		\addplot[color = Black, line width = 1pt]
+		\addplot[color = Black, line width = 0.5pt]
 		table[skip first n = 0, x = Time, y = E*, col sep = comma] 
 		{./lo_noDis.csv};
 		
@@ -273,7 +273,7 @@
 		xlabel = {$\ctime$ [s]},
 		legend style={at={(0.975,.975)},anchor=north east},
 		legend cell align={left},
-		xmin = 0,
+		xmin = 9,
 		xmax = 10,
 		ylabel = {Fuerza $\force$, [N]},
 		ymin = -1500,
@@ -326,7 +326,7 @@
 		ylabel near ticks,
 		xlabel near ticks]
 		
-		\addplot[color = Orange, line width = 1pt, dotted]
+		\addplot[color = Orange, line width = 1pt]
 		table[skip first n = 0, x = Time, y = E_ref, col sep = comma] 
 		{./lo_Dis.csv};
 		
@@ -334,7 +334,7 @@
 		table[skip first n = 0, x = Time, y = E*, col sep = comma] 
 		{./cosim_Dis.csv};
 		
-		\addplot[color = Black, line width = 1pt]
+		\addplot[color = Black, line width = 0.75pt]
 		table[skip first n = 0, x = Time, y = E*, col sep = comma] 
 		{./lo_Dis.csv};
 		

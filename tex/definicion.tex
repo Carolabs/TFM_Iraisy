@@ -66,7 +66,7 @@ El problema se puede ilustrar asumiendo que la dinámica de un subsistema dado s
 \end{equation}
 %
 donde $\state$ es el vector de estados del subsistema, y $\stateMatrix$, $\inputMatrix$, $\outputMatrix$ y $\feedthrough$ son las matrices de estado, inputs, outputs y feedthrough, respectivamente.
-En un esquema de tipo Jacobi single-rate como el de la Figura~\ref{fig:jacobi}, si se utilizan fórmulas de integración explícitas en los subsistemas, la evaluación de las derivadas de los estados $\derivative$ en el macrostep $[\ ctime^{\step}, \ctime^{\step + 1}]$ solo necesita ejecutarse en el instante $\ctime^{\step}$ para evaluar $\state^{\step + 1}$.
+En un esquema de tipo Jacobi single-rate como el de la Figura~\ref{fig:jacobi}, si se utilizan fórmulas de integración explícitas en los subsistemas, la evaluación de las derivadas de los estados $\derivative$ en el macrostep $[\ctime^{\step}, \ctime^{\step + 1}]$ solo necesita ejecutarse en el instante $\ctime^{\step}$ para evaluar $\state^{\step + 1}$.
 En este momento, se conocen tanto el estado $\state^{\step}$ como la entrada $\inputs^{\step}$, por lo que la interfaz de co-simulación de tiempo discreto no introduce ningún error en el cálculo de las derivadas del sistema.
 
 La salida del subsistema $\outputs$, por otro lado, debe evaluarse y devolverse en el tiempo $\ctime^{\step + 1}$ como

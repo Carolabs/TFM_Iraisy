@@ -7,7 +7,7 @@
 \commentIF{Escribir una introducción aquí}
 
 \commentFG{Cierto, habrá que darle un poco de contexto. Una duda que me surge: hablas de estimadores lineales. Al menos uno de los sistemas que vas a intentar estabilizar es claramente no lineal... ¿esperamos que funcionen?}
-
+\commentIF{Con el oscilador no lineal ha funcionado}
 \commentFG{Mi ayuda con esta parte irá sobre todo en la línea de preguntar las cosas que no entienda.}
 
 %__________________________ SECCIÓN
@@ -21,14 +21,12 @@ Los estimadores son expresiones matemáticas donde se intentan aproximar valores
 %
 donde $\mathcal{F}$ es la función que aproxima el valor de la variable a estimar $\estimated$, con los valores disponibles de las variables estimadoras $\estimation$.
 
-\commentFG{Una cosa: si el párrafo que va después de la ecuación no está unido a ella en el código te va a quedar una indentación al principio, que no queda muy bien en el texto. Para evitar eso, es necesario que no haya líneas en blanco entre el texto y la ecuación. Yo suelo resolverlo poniendo un comentario -mira la diferencia entre (7.1) y (7.2).}
-
 Particularizando la expresión anterior para el caso en el que la función estimadora $\mathcal{F}$ sea un polinomio de coeficientes constantes, el estimador puede expresarse de la siguiente manera:
 %
 \begin{equation}
     \estimated \approx \coefficients \estimation = \sqbr{\hvect{cccc}{\coefficient_0 & \coefficient_1 & \hdots & \coefficient_{n-1}}} \estimation
 \end{equation}
-
+%
 donde $\estimation$ es el vector de tamaño $n$ que incluye los valores conocidos que pueden estar referidos al instante actual o también a instantes pasados, y $\coefficients$ es el vector de coeficientes del estimador que deben ser calculados para cada aplicación. Los valores contenidos en $\estimation$ no tienen que ser necesariamente los valores disponibles originales, sino que podrían ser, por ejemplo, potencias de estos valores.
 
 Para el cálculo de los coeficientes de un estimador polinómico, se pueden calcular a través de un ajuste por mínimos cuadrados de la siguiente manera:
@@ -46,7 +44,7 @@ donde $()\inv$ representa comúnmente a la pseudoinversa en lugar de la inversa,
 El estimador propuesto es un polinomio de primer orden que usa como entradas los valores de la fuerza calculados como outputs en el instante actual $t_k$ y en el instante anterior $t_{k-1}$. Se incluirá un término independiente correspondiente a $\coefficient_0$ de la forma:
 %
 \begin{equation}
-    \estimated \approx \coefficients \estimation = \sqbr{\hvect{ccc}{\coefficient_0 & \coefficient_1 & \coefficient_2}} \sqbr{\cvvect{1 \\ \forceMod (t_k) \\ \forceMod (t_{k-1})}} = \coefficient_0 + \sqbr{\hvect{cc}{\coefficient_1 & \coefficient_2}} \sqbr{\cvvect{\forceMod (t_k) \\ \forceMod (t_{k-1})}}
+    \estimated (t_k) \approx \coefficients \estimation = \sqbr{\hvect{ccc}{\coefficient_0 & \coefficient_1 & \coefficient_2}} \sqbr{\cvvect{1 \\ \forceMod (t_k) \\ \forceMod (t_{k-1})}} = \coefficient_0 + \sqbr{\hvect{cc}{\coefficient_1 & \coefficient_2}} \sqbr{\cvvect{\forceMod (t_k) \\ \forceMod (t_{k-1})}}
 \end{equation}
 
 donde $\forceMod (t_k)$ y $\forceMod (t_{k-1})$ corresponden a los valores de la fuerza obtenidos directamente como outputs del subsistema que presenta direct feedthrough, y que por lo tanto introducen importantes errores en el esquema de co-simulación al usar estos valores como inputs en la integración numérica del subsistema que no presenta direct feedthrough.
